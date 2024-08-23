@@ -1,6 +1,6 @@
 node_modules
 .DS_Store
-deno.lock
+/deno.lock
 /lib
 /browser
 /playground

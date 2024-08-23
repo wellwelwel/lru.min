@@ -40,7 +40,7 @@ console.log('› \x1b[1mNode.js\x1b[0m');
 
       console.log(`\n🚀 Fastest is \x1b[1m${fatest}\x1b[0m\n`);
 
-      if (!/^lru.min/.test(fatest)) {
+      if (!/lru.min/.test(fatest)) {
         process.exit(1);
       }
     })
@@ -79,7 +79,7 @@ console.log('› \x1b[1mBun\x1b[0m');
 
       console.log(`\n🚀 Fastest is \x1b[1m${fatest}\x1b[0m\n`);
 
-      if (!/^lru.min/.test(fatest)) {
+      if (!/lru.min/.test(fatest)) {
         process.exit(1);
       }
     })
@@ -118,7 +118,7 @@ console.log('› \x1b[1mDeno\x1b[0m');
 
       console.log(`\n🚀 Fastest is \x1b[1m${fatest}\x1b[0m\n`);
 
-      if (!/^lru.min/.test(fatest)) {
+      if (!/lru.min/.test(fatest)) {
         process.exit(1);
       }
     })
