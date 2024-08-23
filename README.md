@@ -46,7 +46,7 @@ deno add npm:lru.min
 ## Usage
 
 > - ⚠️ Please wait until `v1.x.x` before using this package.
-> - 📘 Complete documentation an public repository coming soon.
+> - 📘 Complete documentation and public repository coming soon.
 
 ### Import
 
