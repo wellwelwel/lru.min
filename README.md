@@ -1,7 +1,7 @@
 <h1 align="center">lru.min</h1>
 <div align="center">
 
-🔥 Extremely fast <strong>LRU Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **6.1KB**.
+🔥 Extremely fast and efficient <strong>LRU Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **6.1KB**.
 
 </div>
 
@@ -14,9 +14,9 @@
 #### 👨🏻‍💻 Features
 
 - 🕢 Smart and dynamic **TTL**.
-- 🧹 Efficient **disposal** handling.
+- 🗑️ Efficient **disposal** handling.
 - ✅ Truly respects the maximum **cache size**.
-- 🔑 Take full caching control _(highly debuggable)_.
+- 🧑🏻‍🔬 Full caching control _(highly debuggable)_.
 
 #### 🎖️ [Performance](#performance)
 
@@ -75,7 +75,7 @@ const { createLRU } = require('lru.min');
 In **Bun**, lru.min achieves up to **11** more operations per second than [**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.x.x` and up to **5** more ops per second than [**quick-lru**](https://github.com/sindresorhus/quick-lru) `v7.x.x` for essential usage (_get_, _set_, _evict_, and _delete_ the cache):
 
 ```sh
-# Total Number of Cores: 24 (16 performance and 8 efficiency)
+# Total Number of Cores: 24
 # Memory: 64 GB
 
 › Node.js
