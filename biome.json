@@ -1,0 +1,67 @@
+{
+  "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
+  "files": {
+    "include": ["**/**"],
+    "ignore": ["node_modules", "lib", "browser"]
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "all": true,
+      "complexity": {
+        "all": true,
+        "noExcessiveCognitiveComplexity": "off"
+      },
+      "a11y": {
+        "all": true
+      },
+      "correctness": {
+        "all": true,
+        "noNodejsModules": "off"
+      },
+      "nursery": {
+        "all": true,
+        "useImportRestrictions": "off",
+        "useImportExtensions": "error",
+        "noConsole": "off"
+      },
+      "performance": {
+        "all": true,
+        "noAccumulatingSpread": "error",
+        "noBarrelFile": "error",
+        "noDelete": "error",
+        "noReExportAll": "error"
+      },
+      "security": {
+        "all": true
+      },
+      "suspicious": {
+        "all": true,
+        "noConsoleLog": "off",
+        "noEmptyBlockStatements": "off"
+      },
+      "style": {
+        "all": true,
+        "useNamingConvention": "off",
+        "noNamespaceImport": "off",
+        "noDefaultExport": "error",
+        "useBlockStatements": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "include": ["test", "tools"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noNodejsModules": "off"
+          },
+          "nursery": {
+            "useTopLevelRegex": "off"
+          }
+        }
+      }
+    }
+  ]
+}

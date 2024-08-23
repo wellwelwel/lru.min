@@ -1,0 +1,6 @@
+{
+  "imports": {
+    "lru-cache": "npm:lru-cache@^11.0.0",
+    "quick-lru": "npm:quick-lru@^7.0.0"
+  }
+}
