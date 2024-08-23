@@ -1,7 +1,7 @@
 <h1 align="center">lru.min</h1>
 <div align="center">
 
-🔥 Extremely fast and efficient <strong>LRU Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **6.1KB**.
+🔥 An extremely fast and efficient <strong>LRU Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **6.1KB**.
 
 </div>
 
