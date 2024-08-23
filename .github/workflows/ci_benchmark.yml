@@ -27,6 +27,16 @@ jobs:
           key: npm-linux-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-linux-
 
+      - name: ➕ Actions - Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: '1.1.22'
+
+      - name: ➕ Actions - Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: 'v1.x'
+
       - name: ➕ Cache dependencies (Benchmark)
         uses: actions/cache@v4
         with:
