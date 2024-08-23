@@ -72,7 +72,7 @@ const { createLRU } = require('lru.min');
 
 ## Performance
 
-In [**Bun**](https://github.com/oven-sh/bun), **lru.min** achieves up to **11** more operations per second than [**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.x.x` and up to **5** more ops per second than [**quick-lru**](https://github.com/sindresorhus/quick-lru) `v7.x.x` for essential usage (_get_, _set_, _evict_, and _delete_ the cache):
+**lru.min** is [continuously tested](https://github.com/wellwelwel/lru.min/blob/main/.github/workflows/ci_benchmark.yml) to ensure the following expectations:
 
 ```sh
 # Total Number of Cores: 24
@@ -100,8 +100,9 @@ lru.min     x 56.39 ops/sec — ±0.33% (74 runs sampled)
 🚀 Fastest is lru.min
 ```
 
+> ⚡️ In [**Bun**](https://github.com/oven-sh/bun), **lru.min** achieves up to **11** more operations per second than [**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.x.x` and up to **5** more ops per second than [**quick-lru**](https://github.com/sindresorhus/quick-lru) `v7.x.x` for essential usage (_get_, _set_, _evict_, and _delete_ the cache).
+
 - You can see how the tests are run and compared in the [benchmark](https://github.com/wellwelwel/lru.min/tree/main/benchmark) directory.
-- **lru.min** is [continuously tested](https://github.com/wellwelwel/lru.min/blob/main/.github/workflows/ci_benchmark.yml) to ensure the above expectations.
 
 <!--
 
