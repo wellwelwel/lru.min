@@ -72,7 +72,7 @@ const { createLRU } = require('lru.min');
 
 ## Performance
 
-In **Bun**, lru.min achieves up to **11** more operations per second than [**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.x.x` and up to **5** more ops per second than [**quick-lru**](https://github.com/sindresorhus/quick-lru) `v7.x.x` for essential usage (_get_, _set_, _evict_, and _delete_ the cache):
+In [**Bun**](https://github.com/oven-sh/bun), **lru.min** achieves up to **11** more operations per second than [**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.x.x` and up to **5** more ops per second than [**quick-lru**](https://github.com/sindresorhus/quick-lru) `v7.x.x` for essential usage (_get_, _set_, _evict_, and _delete_ the cache):
 
 ```sh
 # Total Number of Cores: 24
