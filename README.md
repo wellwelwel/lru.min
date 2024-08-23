@@ -20,7 +20,7 @@
 
 #### 🎖️ [Performance](#performance)
 
-- **lru.min** has beaten the two most used and popular **LRU** packages.
+- Amazingly, even with a robust solution and a minimal code, **lru.min** has beaten the two most currently used and popular **LRU** packages.
 
 ---
 
