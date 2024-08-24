@@ -7,7 +7,7 @@ interface CacheNode<Key, Value> {
   ttl: number | undefined;
 }
 
-export interface LRUCacheOptions<Key extends string, Value> {
+export interface LRUCacheOptions<Key, Value> {
   max: number;
   ttl?: number;
   dispose?: (value: Value, key: Key) => unknown;
@@ -17,9 +17,7 @@ export interface LRUSetOptions {
   ttl?: number;
 }
 
-export const createLRU = <Key extends string, Value>(
-  options: LRUCacheOptions<Key, Value>
-) => {
+export const createLRU = <Key, Value>(options: LRUCacheOptions<Key, Value>) => {
   if (!(options.max && Number.isInteger(options.max)))
     throw new TypeError('`max` must be an integer number greater than 0');
 
