@@ -20,8 +20,8 @@ export interface LRUSetOptions {
 export const createLRU = <Key extends string, Value>(
   options: LRUCacheOptions<Key, Value>
 ) => {
-  if (!(options.max && options.max > 0))
-    throw new TypeError('`max` must be a number greater than 0');
+  if (!(options.max && Number.isInteger(options.max)))
+    throw new TypeError('`max` must be an integer number greater than 0');
 
   if (typeof options.ttl === 'number' && options.ttl === 0)
     throw new TypeError('`ttl` must be a number greater than 0');
@@ -153,6 +153,9 @@ export const createLRU = <Key extends string, Value>(
   const forEach = (
     callback: (value: Value, key: Key) => undefined
   ): undefined => {
+    if (typeof callback !== 'function')
+      throw new TypeError('`callback` must be a function');
+
     for (let current = head; current !== null; current = current.next) {
       if (!refresh(current.key)) continue;
 
@@ -173,6 +176,9 @@ export const createLRU = <Key extends string, Value>(
   };
 
   const evict = (size = 1): undefined => {
+    if (!(size && Number.isInteger(size)))
+      throw new TypeError('`size` must be an integer number greater than 0');
+
     for (let i = 0; i < size; i++) {
       if (!tail) return;
 
@@ -196,6 +202,9 @@ export const createLRU = <Key extends string, Value>(
   };
 
   const resize = (newMax: number): undefined => {
+    if (!(newMax && Number.isInteger(newMax)))
+      throw new TypeError('`newMax` must be an integer number greater than 0');
+
     max = newMax;
 
     for (let i = size; i > max; i--) evict();
