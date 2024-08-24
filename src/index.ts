@@ -4,7 +4,7 @@ interface CacheNode<Key, Value> {
   prev: CacheNode<Key, Value> | null;
   next: CacheNode<Key, Value> | null;
   timestamp: number | undefined;
-  ttl?: number;
+  ttl: number | undefined;
 }
 
 export interface LRUCacheOptions<Key extends string, Value> {
@@ -20,13 +20,11 @@ export interface LRUSetOptions {
 export const createLRU = <Key extends string, Value>(
   options: LRUCacheOptions<Key, Value>
 ) => {
-  if (!(options.max && options.max > 0)) {
+  if (!(options.max && options.max > 0))
     throw new TypeError('`max` must be a number greater than 0');
-  }
 
-  if (typeof options.ttl === 'number' && options.ttl === 0) {
+  if (typeof options.ttl === 'number' && options.ttl === 0)
     throw new TypeError('`ttl` must be a number greater than 0');
-  }
 
   let max = options.max;
   let head: CacheNode<Key, Value> | null = null;
@@ -34,9 +32,9 @@ export const createLRU = <Key extends string, Value>(
   let size = 0;
 
   const map = new Map<Key, CacheNode<Key, Value>>();
-  const ttl = options?.ttl;
+  const ttl = options.ttl;
   const dispose =
-    typeof options.dispose === 'function' ? options?.dispose : undefined;
+    typeof options.dispose === 'function' ? options.dispose : undefined;
 
   const addNode = (node: CacheNode<Key, Value>): undefined => {
     node.next = head;
@@ -92,9 +90,8 @@ export const createLRU = <Key extends string, Value>(
   };
 
   const set = (key: Key, value: Value, options?: LRUSetOptions): undefined => {
-    if (typeof options?.ttl === 'number' && options.ttl === 0) {
+    if (typeof options?.ttl === 'number' && options.ttl === 0)
       throw new TypeError('`ttl` must be a number greater than 0');
-    }
 
     let node = map.get(key);
 
@@ -118,6 +115,7 @@ export const createLRU = <Key extends string, Value>(
       prev: null,
       next: null,
       timestamp: now,
+      ttl: options?.ttl,
     };
 
     map.set(key, node);
