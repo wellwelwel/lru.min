@@ -68,7 +68,6 @@
   },
   "keywords": [
     "lru",
-    "mru",
     "cache",
     "caching",
     "ttl",
