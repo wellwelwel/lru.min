@@ -1,34 +1,42 @@
-export interface LRUCacheOptions<Key extends string, Value> {
-  max: number;
-  maxAge?: number;
-  dispose?: (value: Value, key: Key) => undefined;
-}
-
-export interface SetOptions {
-  maxAge?: number;
-}
-
 interface CacheNode<Key, Value> {
   key: Key;
   value: Value;
   prev: CacheNode<Key, Value> | null;
   next: CacheNode<Key, Value> | null;
-  timestamp?: number;
-  maxAge?: number;
+  timestamp: number | undefined;
+  ttl?: number;
+}
+
+export interface LRUCacheOptions<Key extends string, Value> {
+  max: number;
+  ttl?: number;
+  dispose?: (value: Value, key: Key) => unknown;
+}
+
+export interface LRUSetOptions {
+  ttl?: number;
 }
 
 export const createLRU = <Key extends string, Value>(
   options: LRUCacheOptions<Key, Value>
 ) => {
+  if (!(options.max && options.max > 0)) {
+    throw new TypeError('`max` must be a number greater than 0');
+  }
+
+  if (typeof options.ttl === 'number' && options.ttl === 0) {
+    throw new TypeError('`ttl` must be a number greater than 0');
+  }
+
   let max = options.max;
   let head: CacheNode<Key, Value> | null = null;
   let tail: CacheNode<Key, Value> | null = null;
   let size = 0;
-  let maxAgeCount = 0;
 
   const map = new Map<Key, CacheNode<Key, Value>>();
-  const dispose = options?.dispose;
-  const maxAge = options?.maxAge;
+  const ttl = options?.ttl;
+  const dispose =
+    typeof options.dispose === 'function' ? options?.dispose : undefined;
 
   const addNode = (node: CacheNode<Key, Value>): undefined => {
     node.next = head;
@@ -54,71 +62,55 @@ export const createLRU = <Key extends string, Value>(
     addNode(node);
   };
 
-  function refresh(key: Key): boolean;
-  function refresh(): undefined;
-  function refresh(key?: Key): boolean | undefined {
-    if (!(maxAge || maxAgeCount)) return true;
+  const refresh = (key: Key): boolean => {
+    const node = map.get(key);
+    if (!node?.timestamp) return true;
+
+    const TTL = node.ttl ?? ttl;
+    if (!TTL) return true;
 
     const now = Date.now();
 
-    if (key) {
-      const node = map.get(key);
-      if (!node?.timestamp) return true;
-
-      const effectiveMaxAge = node.maxAge ?? maxAge;
-
-      if (effectiveMaxAge && now - node.timestamp > effectiveMaxAge) {
-        del(node.key);
-        return false;
-      }
-
-      return true;
+    if (now - node.timestamp > TTL) {
+      del(node.key);
+      return false;
     }
 
-    for (let current = tail; current !== null; current = current.prev) {
-      if (!current?.timestamp) continue;
-
-      const effectiveMaxAge = current.maxAge ?? maxAge;
-
-      if (effectiveMaxAge && now - current.timestamp > effectiveMaxAge)
-        del(current.key);
-    }
-  }
-
-  const evict = (size = 1): undefined => {
-    for (let i = 0; i < size; i++) {
-      if (!tail) return;
-
-      const tailKey = tail.key;
-      const tailValue = tail.value;
-
-      if (tail.maxAge && maxAgeCount > 0) {
-        maxAgeCount--;
-      }
-
-      removeNode(tail);
-      map.delete(tailKey);
-
-      if (dispose) dispose(tailValue, tailKey);
-    }
+    return true;
   };
 
-  const set = (key: Key, value: Value, options?: SetOptions): undefined => {
+  const iterate = <T>(callback: (key: Key, value: Value) => T): T[] => {
+    const result: T[] = [];
+
+    for (let current = head; current !== null; current = current.next) {
+      if (!refresh(current.key)) continue;
+
+      result.push(callback(current.key, current.value));
+    }
+
+    return result;
+  };
+
+  const set = (key: Key, value: Value, options?: LRUSetOptions): undefined => {
+    if (typeof options?.ttl === 'number' && options.ttl === 0) {
+      throw new TypeError('`ttl` must be a number greater than 0');
+    }
+
     let node = map.get(key);
 
-    const now = maxAge || options?.maxAge ? Date.now() : undefined;
-
-    if (options?.maxAge && !map.has(key)) maxAgeCount++;
+    const now = ttl || options?.ttl ? Date.now() : undefined;
 
     if (node) {
       node.value = value;
       node.timestamp = now;
-      node.maxAge = options?.maxAge;
+      node.ttl = options?.ttl;
 
       if (head !== node) moveToHead(node);
 
       return;
     }
+
+    if (size === max) evict();
 
     node = {
       key,
@@ -130,14 +122,11 @@ export const createLRU = <Key extends string, Value>(
 
     map.set(key, node);
     addNode(node);
-
-    if (size > max) evict();
   };
 
   const get = (key: Key): Value | undefined => {
     const node = map.get(key);
-    if (!node) return;
-    if (!refresh(key)) return;
+    if (!node || !refresh(key)) return;
 
     if (head !== node) moveToHead(node);
 
@@ -146,18 +135,7 @@ export const createLRU = <Key extends string, Value>(
 
   const peek = (key: Key): Value | undefined => {
     const node = map.get(key);
-    if (!node) return;
-    if (!refresh(key)) return;
-
-    if (node?.timestamp) {
-      const now = Date.now();
-      const effectiveMaxAge = node.maxAge ?? maxAge;
-
-      if (effectiveMaxAge && now - node.timestamp > effectiveMaxAge) {
-        del(key);
-        return;
-      }
-    }
+    if (!node || !refresh(key)) return;
 
     return node.value;
   };
@@ -168,41 +146,11 @@ export const createLRU = <Key extends string, Value>(
     return map.has(key);
   };
 
-  const keys = (): Key[] => {
-    const result: Key[] = [];
+  const keys = (): Key[] => iterate((key) => key);
 
-    for (let current = head; current !== null; current = current.next) {
-      if (!refresh(current.key)) continue;
+  const values = (): Value[] => iterate((_, value) => value);
 
-      result.push(current.key);
-    }
-
-    return result;
-  };
-
-  const values = (): Value[] => {
-    const result: Value[] = [];
-
-    for (let current = head; current !== null; current = current.next) {
-      if (!refresh(current.key)) continue;
-
-      result.push(current.value);
-    }
-
-    return result;
-  };
-
-  const entries = (): [Key, Value][] => {
-    const result: [Key, Value][] = [];
-
-    for (let current = head; current !== null; current = current.next) {
-      if (!refresh(current.key)) continue;
-
-      result.push([current.key, current.value]);
-    }
-
-    return result;
-  };
+  const entries = (): [Key, Value][] => iterate((key, value) => [key, value]);
 
   const forEach = (
     callback: (value: Value, key: Key) => undefined
@@ -218,16 +166,26 @@ export const createLRU = <Key extends string, Value>(
     const node = map.get(key);
     if (!node) return false;
 
-    if (node.maxAge && maxAgeCount > 0) {
-      maxAgeCount--;
-    }
-
     removeNode(node);
     map.delete(key);
 
     if (dispose) dispose(node.value, key);
 
     return true;
+  };
+
+  const evict = (size = 1): undefined => {
+    for (let i = 0; i < size; i++) {
+      if (!tail) return;
+
+      const tailKey = tail.key;
+      const tailValue = tail.value;
+
+      removeNode(tail);
+      map.delete(tailKey);
+
+      if (dispose) dispose(tailValue, tailKey);
+    }
   };
 
   const clear = (): undefined => {
@@ -237,7 +195,6 @@ export const createLRU = <Key extends string, Value>(
 
     head = tail = null;
     size = 0;
-    maxAgeCount = 0;
   };
 
   const resize = (newMax: number): undefined => {
@@ -246,17 +203,9 @@ export const createLRU = <Key extends string, Value>(
     for (let i = size; i > max; i--) evict();
   };
 
-  const available = () => {
-    refresh();
+  const available = () => max - map.size;
 
-    return max - map.size;
-  };
-
-  const stored = () => {
-    refresh();
-
-    return map.size;
-  };
+  const stored = () => map.size;
 
   const maxSize = () => max;
 
@@ -267,7 +216,7 @@ export const createLRU = <Key extends string, Value>(
     /** Retrieves the value for a given key and moves the key to the most recent position. */
     get,
 
-    /** Retrieves the value for a given key without changing its position in the cache. */
+    /** Retrieves the value for a given key without changing its position. */
     peek,
 
     /** Checks if a key exists in the cache. */
@@ -279,7 +228,7 @@ export const createLRU = <Key extends string, Value>(
     /** Returns an array of all values in the cache, from most recent to least recent. */
     values,
 
-    /** Returns an array of [key, value] pairs, from most recent to least recent. */
+    /** Returns an array of `[key, value]` pairs, from most recent to least recent. */
     entries,
 
     /** Iterates over each key-value pair in the cache, from most recent to least recent. */
@@ -297,13 +246,13 @@ export const createLRU = <Key extends string, Value>(
     /** Resizes the cache to a new maximum size, evicting items if necessary. */
     resize,
 
-    /** Returns the number of available slots in the cache before reaching the maximum size. */
+    /** Returns the number of currently available slots in the cache before reaching the maximum size. */
     available,
 
     /** Returns the number of items currently stored in the cache. */
     stored,
 
     /** Returns the maximum number of items that can be stored in the cache. */
-    maxSize,
+    max: maxSize,
   };
 };
