@@ -45,7 +45,8 @@
         "useNamingConvention": "off",
         "noNamespaceImport": "off",
         "noDefaultExport": "error",
-        "useBlockStatements": "off"
+        "useBlockStatements": "off",
+        "noNonNullAssertion": "off"
       }
     }
   },
