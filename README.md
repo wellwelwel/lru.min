@@ -11,17 +11,6 @@
 
 - **lru.min** ensures is fully compatible with both **Node.js** _(8+)_, **Bun**, **Deno** and, browser environments.<br />
 
-#### 👨🏻‍💻 Features
-
-- 🕢 Smart and dynamic **TTL**.
-- 🗑️ Efficient **disposal** handling.
-- ✅ Truly respects the maximum **cache size**.
-- 🧑🏻‍🔬 Full caching control _(highly debuggable)_.
-
-#### 🎖️ [Performance](#performance)
-
-- Amazingly, even with a robust solution and a minimal code, **lru.min** has beaten the two most currently used and popular **LRU** packages.
-
 ---
 
 ## Install
@@ -67,42 +56,6 @@ const { createLRU } = require('lru.min');
 ```html
 <script src="https://cdn.jsdelivr.net/npm/lru.min/browser/lru.min.js"></script>
 ```
-
----
-
-## Performance
-
-**lru.min** is [continuously tested](https://github.com/wellwelwel/lru.min/blob/main/.github/workflows/ci_benchmark.yml) to ensure the following expectations:
-
-```sh
-# Total Number of Cores: 24
-# Memory: 64 GB
-
-› Node.js
-lru-cache   x 24.42 ops/sec — ±0.76% (45 runs sampled)
-quick-lru   x 25.62 ops/sec — ±0.33% (47 runs sampled)
-lru.min     x 26.28 ops/sec — ±0.19% (48 runs sampled)
-
-🚀 Fastest is lru.min
-
-› Bun
-lru-cache   x 97.75 ops/sec — ±0.32% (85 runs sampled)
-quick-lru   x 105.72 ops/sec — ±0.33% (79 runs sampled)
-lru.min     x 110.08 ops/sec — ±0.34% (82 runs sampled)
-
-🚀 Fastest is lru.min
-
-› Deno
-lru-cache   x 52.79 ops/sec — ±0.38% (70 runs sampled)
-quick-lru   x 54.23 ops/sec — ±0.34% (71 runs sampled)
-lru.min     x 56.39 ops/sec — ±0.33% (74 runs sampled)
-
-🚀 Fastest is lru.min
-```
-
-> ⚡️ In [**Bun**](https://github.com/oven-sh/bun), **lru.min** achieves up to **11** more operations per second than [**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.x.x` and up to **5** more ops per second than [**quick-lru**](https://github.com/sindresorhus/quick-lru) `v7.x.x` for essential usage (_get_, _set_, _evict_, and _delete_ the cache).
-
-- You can see how the tests are run and compared in the [benchmark](https://github.com/wellwelwel/lru.min/tree/main/benchmark) directory.
 
 <!--
 
