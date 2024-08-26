@@ -2,7 +2,7 @@ export const createLRU = <Key, Value>(options: {
   /** Maximum number of items the cache can hold. */
   max: number;
   /** Function called when an item is evicted from the cache. */
-  onEviction?: (value: Value, key: Key) => unknown;
+  onEviction?: (key: Key, value: Value) => unknown;
 }) => {
   let { max, onEviction } = options;
 
@@ -41,7 +41,7 @@ export const createLRU = <Key, Value>(options: {
     const evictHead = head;
     const key = keyList[evictHead]!;
 
-    onEviction?.(valList[evictHead]!, key);
+    onEviction?.(key, valList[evictHead]!);
     keyMap.delete(key);
 
     keyList[evictHead] = undefined;
@@ -62,7 +62,7 @@ export const createLRU = <Key, Value>(options: {
         keyMap.set(key, index);
         keyList[index] = key;
         size++;
-      } else onEviction?.(valList[index]!, key);
+      } else onEviction?.(key, valList[index]!);
 
       valList[index] = value;
 
@@ -138,7 +138,7 @@ export const createLRU = <Key, Value>(options: {
       const index = keyMap.get(key);
 
       if (index !== undefined) {
-        onEviction?.(valList[index]!, key);
+        onEviction?.(key, valList[index]!);
         keyMap.delete(key);
         free.push(index);
 
@@ -166,7 +166,7 @@ export const createLRU = <Key, Value>(options: {
     /** Clears all key-value pairs from the cache. */
     clear(): undefined {
       for (const index of keyMap.values())
-        onEviction?.(valList[index]!, keyList[index]!);
+        onEviction?.(keyList[index]!, valList[index]!);
 
       keyMap.clear();
       keyList.fill(undefined);
