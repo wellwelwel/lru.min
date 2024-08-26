@@ -274,12 +274,12 @@ See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main
 
 ## Acknowledgements
 
-> **lru.min** is based on the architecture and code of [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
+> **lru.min** is based and inspired on the architecture and code of both [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
 >
 > For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
 
-- [@isaacs](https://github.com/isaacs) and [lru-cache](https://github.com/isaacs/node-lru-cache).
-- [@sindresorhus](https://github.com/sindresorhus) and [quick-lru](https://github.com/sindresorhus/quick-lru).
+- The architecture is mostly based on [@isaacs](https://github.com/isaacs) — [**lru-cache**](https://github.com/isaacs/node-lru-cache/blob/8f51d75351cbb4ac819952eb8e9f95eda00ef800/src/index.ts).
+- Most of the methods names and its functionalities were inspired by [@sindresorhus](https://github.com/sindresorhus) — [**quick-lru**](https://github.com/sindresorhus/quick-lru/blob/a2262c65e1952539cb4d985a67c46363a780d234/index.js).
 - [![Contributors](https://img.shields.io/github/contributors/wellwelwel/lru.min?label=Contributors)](https://github.com/wellwelwel/lru.min/graphs/contributors)
 
 ---
@@ -288,9 +288,3 @@ See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main
 
 **lru.min** is under the [**MIT License**](https://github.com/wellwelwel/lru.min/blob/main/LICENSE).<br />
 Copyright © 2024-present [Weslley Araújo](https://github.com/wellwelwel) and **lru.min** [contributors](https://github.com/wellwelwel/lru.min/graphs/contributors).
-
-**lru-cache** is licensed under the [**ISC License**](https://github.com/isaacs/node-lru-cache/blob/main/LICENSE).<br />
-Copyright © Isaac Z. Schlueter and Contributors.
-
-**quick-lru** is licensed under the [**MIT License**](https://github.com/sindresorhus/quick-lru/blob/main/license).<br />
-Copyright © Sindre Sorhus.
