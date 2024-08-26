@@ -268,7 +268,7 @@ Please check the [**SECURITY.md**](https://github.com/wellwelwel/lru.min/blob/ma
 
 ## Contributing
 
-See the [**Contributing Guide**](https://github.com/wellwelwel/poku/blob/main/CONTRIBUTING.md) and please follow our [**Code of Conduct**](https://github.com/wellwelwel/poku/blob/main/CODE_OF_CONDUCT.md) 🚀
+See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main/CONTRIBUTING.md) and please follow our [**Code of Conduct**](https://github.com/wellwelwel/lru.min/blob/main/CODE_OF_CONDUCT.md) 🚀
 
 ---
 
