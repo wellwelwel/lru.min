@@ -70,14 +70,14 @@ const { createLRU } = require('lru.min');
 ```ts
 import { createLRU } from 'lru.min';
 
-const LRU = createLRU({ max: 150000 });
+const LRU = createLRU({ max: 150_000 });
 ```
 
 Also, you can set a callback for every deletion/eviction:
 
 ```ts
 const LRU = createLRU({
-  max: 1000,
+  max: 150_000,
   onEviction: (key, value) => {
     // do something
   },
@@ -133,7 +133,7 @@ LRU.evict(1000);
 Resizes the cache to a new maximum size, evicting items if necessary.
 
 ```ts
-LRU.resize(50000);
+LRU.resize(50_000);
 ```
 
 ### Clear the cache
