@@ -70,7 +70,7 @@ const { createLRU } = require('lru.min');
 ```ts
 import { createLRU } from 'lru.min';
 
-const LRU = createLRU({ max: 1000 });
+const LRU = createLRU({ max: 150000 });
 ```
 
 Also, you can set a callback for every deletion/eviction:
@@ -125,7 +125,7 @@ LRU.delete('key');
 Evicts the specified number of the oldest items from the cache.
 
 ```ts
-LRU.evict(10);
+LRU.evict(1000);
 ```
 
 ### Resize the cache
@@ -133,7 +133,7 @@ LRU.evict(10);
 Resizes the cache to a new maximum size, evicting items if necessary.
 
 ```ts
-LRU.resize(500);
+LRU.resize(50000);
 ```
 
 ### Clear the cache
