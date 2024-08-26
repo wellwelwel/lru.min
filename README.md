@@ -5,8 +5,6 @@
 
 </div>
 
->
-
 ## Why
 
 #### 🤝 Compatibility
@@ -75,12 +73,12 @@ import { createLRU } from 'lru.min';
 const LRU = createLRU({ max: 1000 });
 ```
 
-Also, you can set a callback for every deletion:
+Also, you can set a callback for every deletion/eviction:
 
 ```ts
 const LRU = createLRU({
   max: 1000,
-  dispose: (key, value) => {
+  onEviction: (key, value) => {
     // do something
   },
 });
@@ -260,13 +258,17 @@ lru-cache: 227.80ms
 quick-lru: 253.00ms
 ```
 
-[**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.x.x`
-
 ---
 
 ## Security Policy
 
 Please check the [**SECURITY.md**](https://github.com/wellwelwel/lru.min/blob/main/SECURITY.md).
+
+---
+
+## Contributing
+
+See the [**Contributing Guide**](https://github.com/wellwelwel/poku/blob/main/CONTRIBUTING.md) and please follow our [**Code of Conduct**](https://github.com/wellwelwel/poku/blob/main/CODE_OF_CONDUCT.md) 🚀
 
 ---
 
@@ -288,7 +290,7 @@ Please check the [**SECURITY.md**](https://github.com/wellwelwel/lru.min/blob/ma
 Copyright © 2024-present [Weslley Araújo](https://github.com/wellwelwel) and **lru.min** [contributors](https://github.com/wellwelwel/lru.min/graphs/contributors).
 
 **lru-cache** is licensed under the [**ISC License**](https://github.com/isaacs/node-lru-cache/blob/main/LICENSE).<br />
-Copyright © 2010-2023 Isaac Z. Schlueter and Contributors.
+Copyright © Isaac Z. Schlueter and Contributors.
 
 **quick-lru** is licensed under the [**MIT License**](https://github.com/sindresorhus/quick-lru/blob/main/license).<br />
 Copyright © Sindre Sorhus.
