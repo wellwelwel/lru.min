@@ -2,7 +2,7 @@
   "$schema": "https://biomejs.dev/schemas/1.8.3/schema.json",
   "files": {
     "include": ["**/**"],
-    "ignore": ["node_modules", "lib", "browser"]
+    "ignore": ["node_modules", "lib", "browser", "benchmark"]
   },
   "linter": {
     "enabled": true,
@@ -60,20 +60,6 @@
           },
           "nursery": {
             "useTopLevelRegex": "off"
-          }
-        }
-      }
-    },
-    {
-      "include": ["benchmark"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noNodejsModules": "off"
-          },
-          "nursery": {
-            "useTopLevelRegex": "off",
-            "noUndeclaredDependencies": "off"
           }
         }
       }
