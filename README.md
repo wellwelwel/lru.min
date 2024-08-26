@@ -5,8 +5,6 @@
 
 </div>
 
->
-
 ## Why
 
 #### 🤝 Compatibility
@@ -72,15 +70,15 @@ const { createLRU } = require('lru.min');
 ```ts
 import { createLRU } from 'lru.min';
 
-const LRU = createLRU({ max: 1000 });
+const LRU = createLRU({ max: 150000 });
 ```
 
-Also, you can set a callback for every deletion:
+Also, you can set a callback for every deletion/eviction:
 
 ```ts
 const LRU = createLRU({
   max: 1000,
-  dispose: (key, value) => {
+  onEviction: (key, value) => {
     // do something
   },
 });
@@ -127,7 +125,7 @@ LRU.delete('key');
 Evicts the specified number of the oldest items from the cache.
 
 ```ts
-LRU.evict(10);
+LRU.evict(1000);
 ```
 
 ### Resize the cache
@@ -135,7 +133,7 @@ LRU.evict(10);
 Resizes the cache to a new maximum size, evicting items if necessary.
 
 ```ts
-LRU.resize(500);
+LRU.resize(50000);
 ```
 
 ### Clear the cache
@@ -260,8 +258,6 @@ lru-cache: 227.80ms
 quick-lru: 253.00ms
 ```
 
-[**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.x.x`
-
 ---
 
 ## Security Policy
@@ -270,14 +266,20 @@ Please check the [**SECURITY.md**](https://github.com/wellwelwel/lru.min/blob/ma
 
 ---
 
+## Contributing
+
+See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main/CONTRIBUTING.md) and please follow our [**Code of Conduct**](https://github.com/wellwelwel/lru.min/blob/main/CODE_OF_CONDUCT.md) 🚀
+
+---
+
 ## Acknowledgements
 
-> **lru.min** is based on the architecture and code of [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
+> **lru.min** is based and inspired on the architecture and code of both [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
 >
 > For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
 
-- [@isaacs](https://github.com/isaacs) and [lru-cache](https://github.com/isaacs/node-lru-cache).
-- [@sindresorhus](https://github.com/sindresorhus) and [quick-lru](https://github.com/sindresorhus/quick-lru).
+- The architecture is mostly based on [@isaacs](https://github.com/isaacs) — [**lru-cache**](https://github.com/isaacs/node-lru-cache/blob/8f51d75351cbb4ac819952eb8e9f95eda00ef800/src/index.ts).
+- Most of the methods names and its functionalities were inspired by [@sindresorhus](https://github.com/sindresorhus) — [**quick-lru**](https://github.com/sindresorhus/quick-lru/blob/a2262c65e1952539cb4d985a67c46363a780d234/index.js).
 - [![Contributors](https://img.shields.io/github/contributors/wellwelwel/lru.min?label=Contributors)](https://github.com/wellwelwel/lru.min/graphs/contributors)
 
 ---
@@ -286,9 +288,3 @@ Please check the [**SECURITY.md**](https://github.com/wellwelwel/lru.min/blob/ma
 
 **lru.min** is under the [**MIT License**](https://github.com/wellwelwel/lru.min/blob/main/LICENSE).<br />
 Copyright © 2024-present [Weslley Araújo](https://github.com/wellwelwel) and **lru.min** [contributors](https://github.com/wellwelwel/lru.min/graphs/contributors).
-
-**lru-cache** is licensed under the [**ISC License**](https://github.com/isaacs/node-lru-cache/blob/main/LICENSE).<br />
-Copyright © 2010-2023 Isaac Z. Schlueter and Contributors.
-
-**quick-lru** is licensed under the [**MIT License**](https://github.com/sindresorhus/quick-lru/blob/main/license).<br />
-Copyright © Sindre Sorhus.
