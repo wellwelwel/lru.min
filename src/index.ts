@@ -1,192 +1,205 @@
-interface CacheNode<Key, Value> {
-  key: Key;
-  value: Value;
-  prev: CacheNode<Key, Value> | undefined;
-  next: CacheNode<Key, Value> | undefined;
-}
-
-export interface LRUCacheOptions<Key, Value> {
+export const createLRU = <Key, Value>(options: {
+  /** Maximum number of items the cache can hold. */
   max: number;
-  dispose?: (value: Value, key: Key) => unknown;
-}
+  /** Function called when an item is evicted from the cache. */
+  onEviction?: (value: Value, key: Key) => unknown;
+}) => {
+  let { max, onEviction } = options;
 
-export function createLRU<Key, Value>(options: LRUCacheOptions<Key, Value>) {
-  let max = options.max;
-  let head: CacheNode<Key, Value> | undefined;
-  let tail: CacheNode<Key, Value> | undefined;
+  if (!(Number.isInteger(max) && max > 0))
+    throw new TypeError('`max` must be a positive integer');
+
   let size = 0;
+  let head = 0;
+  let tail = 0;
+  let free: number[] = [];
 
-  const map = new Map<Key, CacheNode<Key, Value>>();
-  const dispose =
-    typeof options.dispose === 'function' ? options.dispose : undefined;
+  const keyMap: Map<Key, number> = new Map();
+  const keyList: (Key | undefined)[] = new Array(max).fill(undefined);
+  const valList: (Value | undefined)[] = new Array(max).fill(undefined);
+  const next: number[] = new Array(max).fill(0);
+  const prev: number[] = new Array(max).fill(0);
 
-  const addNode = (node: CacheNode<Key, Value>): undefined => {
-    node.next = head;
+  const moveToTail = (index: number): undefined => {
+    if (index === tail) return;
 
-    if (head) head.prev = node;
-    head = node;
+    const nextIndex = next[index];
 
-    if (!tail) tail = node;
-    size++;
-  };
-
-  const removeNode = (node: CacheNode<Key, Value>): undefined => {
-    if (node.prev !== undefined) node.prev.next = node.next;
-    if (node.next !== undefined) node.next.prev = node.prev;
-    if (node === head) head = node.next ?? undefined;
-    if (node === tail) tail = node.prev ?? undefined;
-
-    node.prev = node.next = undefined;
-    size--;
-  };
-
-  const moveToHead = (node: CacheNode<Key, Value>): undefined => {
-    if (node.prev === undefined && node.next === undefined) return;
-
-    removeNode(node);
-    addNode(node);
-  };
-
-  const iterate = <T>(callback: (key: Key, value: Value) => T): T[] => {
-    const result: T[] = [];
-
-    for (
-      let current = head;
-      current !== undefined;
-      current = current.next ?? undefined
-    ) {
-      result.push(callback(current.key, current.value));
+    if (index === head) head = nextIndex;
+    else {
+      const prevIndex = prev[index];
+      next[prevIndex] = nextIndex;
+      prev[nextIndex] = prevIndex;
     }
 
-    return result;
+    next[tail] = index;
+    prev[index] = tail;
+    tail = index;
   };
 
-  const evict = (): undefined => {
-    if (!tail) return;
+  const _evict = (): number => {
+    const evictHead = head;
+    const key = keyList[evictHead]!;
 
-    const tailKey = tail.key;
+    onEviction?.(valList[evictHead]!, key);
+    keyMap.delete(key);
 
-    removeNode(tail);
-    map.delete(tailKey);
+    keyList[evictHead] = undefined;
+    valList[evictHead] = undefined;
+    head = next[evictHead];
+    size--;
 
-    if (dispose) dispose(tail.value, tailKey);
+    return evictHead;
   };
 
   return {
     /** Adds a key-value pair to the cache. Updates the value if the key already exists. */
-    set: (key: Key, value: Value): undefined => {
-      let node = map.get(key);
+    set(key: Key, value: Value): undefined {
+      let index = keyMap.get(key);
 
-      if (node) {
-        node.value = value;
+      if (index === undefined) {
+        index = size === max ? _evict() : free.length > 0 ? free.pop()! : size;
+        keyMap.set(key, index);
+        keyList[index] = key;
+        size++;
+      } else onEviction?.(valList[index]!, key);
 
-        if (head !== node) moveToHead(node);
+      valList[index] = value;
 
-        return;
-      }
-
-      if (size === max) evict();
-
-      node = {
-        key,
-        value,
-        prev: undefined,
-        next: undefined,
-      };
-
-      map.set(key, node);
-      addNode(node);
+      moveToTail(index);
     },
 
     /** Retrieves the value for a given key and moves the key to the most recent position. */
-    get: (key: Key): Value | undefined => {
-      const node = map.get(key);
-      if (!node) return;
+    get(key: Key): Value | undefined {
+      const index = keyMap.get(key);
 
-      if (head !== node) moveToHead(node);
+      if (index === undefined) return;
 
-      return node.value;
+      moveToTail(index);
+      return valList[index];
     },
 
     /** Retrieves the value for a given key without changing its position. */
     peek: (key: Key): Value | undefined => {
-      const node = map.get(key);
-      if (!node) return;
+      const index = keyMap.get(key);
 
-      return node.value;
+      return index !== undefined ? valList[index] : undefined;
     },
 
     /** Checks if a key exists in the cache. */
-    has: (key: Key): boolean => map.has(key),
+    has: (key: Key): boolean => keyMap.has(key),
 
-    /** Returns an array of all keys in the cache, from most recent to least recent. */
-    keys: (): Key[] => iterate((key) => key),
+    /** Iterates over all keys in the cache, from least recent to most recent. */
+    *keys(): IterableIterator<Key> {
+      let current = head;
 
-    /** Returns an array of all values in the cache, from most recent to least recent. */
-    values: (): Value[] => iterate((_, value) => value),
+      for (let i = 0; i < size; i++) {
+        yield keyList[current]!;
+        current = next[current];
+      }
+    },
 
-    /** Returns an array of `[key, value]` pairs, from most recent to least recent. */
-    entries: (): [Key, Value][] => iterate((key, value) => [key, value]),
+    /** Iterates over all values in the cache, from least recent to most recent. */
+    *values(): IterableIterator<Value> {
+      let current = head;
+
+      for (let i = 0; i < size; i++) {
+        yield valList[current]!;
+        current = next[current];
+      }
+    },
+
+    /** Iterates over `[key, value]` pairs in the cache, from least recent to most recent. */
+    *entries(): IterableIterator<[Key, Value]> {
+      let current = head;
+
+      for (let i = 0; i < size; i++) {
+        yield [keyList[current]!, valList[current]!];
+        current = next[current];
+      }
+    },
 
     /** Iterates over each key-value pair in the cache, from most recent to least recent. */
-    forEach: (callback: (value: Value, key: Key) => undefined): undefined => {
-      for (
-        let current = head;
-        current !== undefined;
-        current = current.next ?? undefined
-      ) {
-        callback(current.value, current.key);
+    forEach: (callback: (value: Value, key: Key) => unknown): undefined => {
+      let current = head;
+
+      for (let i = 0; i < size; i++) {
+        const key = keyList[current]!;
+        const value = valList[current]!;
+
+        callback(value, key);
+
+        current = next[current];
       }
     },
 
     /** Deletes a key-value pair from the cache. */
-    delete: (key: Key): boolean => {
-      const node = map.get(key);
-      if (!node) return false;
+    delete(key: Key): boolean {
+      const index = keyMap.get(key);
 
-      removeNode(node);
-      map.delete(key);
+      if (index !== undefined) {
+        onEviction?.(valList[index]!, key);
+        keyMap.delete(key);
+        free.push(index);
 
-      if (dispose) dispose(node.value, key);
+        keyList[index] = undefined;
+        valList[index] = undefined;
 
-      return true;
+        size--;
+
+        return true;
+      }
+
+      return false;
     },
 
-    /** Prunes the oldest item or the specified number of the oldest items from the cache. */
-    prune: (number: number) => {
-      let toPrune = number > size ? size : number;
+    /** Evicts the oldest item or the specified number of the oldest items from the cache. */
+    evict: (number: number): undefined => {
+      let toPrune = Math.min(number, size);
 
       while (toPrune > 0) {
-        evict();
+        _evict();
         toPrune--;
       }
     },
 
     /** Clears all key-value pairs from the cache. */
-    clear: (): undefined => {
-      if (dispose)
-        for (const node of map.values()) dispose(node.value, node.key);
+    clear(): undefined {
+      for (const index of keyMap.values())
+        onEviction?.(valList[index]!, keyList[index]!);
 
-      map.clear();
+      keyMap.clear();
+      keyList.fill(undefined);
+      valList.fill(undefined);
 
-      head = tail = undefined;
+      free = [];
       size = 0;
+      head = tail = 0;
     },
 
     /** Resizes the cache to a new maximum size, evicting items if necessary. */
     resize: (newMax: number): undefined => {
+      if (!(Number.isInteger(newMax) && newMax > 0))
+        throw new TypeError('`max` must be a positive integer');
+
       max = newMax;
 
-      while (size > max) evict();
+      while (size > max) _evict();
+    },
+
+    /** Returns the maximum number of items that can be stored in the cache. */
+    get max() {
+      return max;
+    },
+
+    /** Returns the number of items currently stored in the cache. */
+    get size() {
+      return size;
     },
 
     /** Returns the number of currently available slots in the cache before reaching the maximum size. */
-    available: () => max - size,
-
-    /** Returns the number of items currently stored in the cache. */
-    size: () => size,
-
-    /** Returns the maximum number of items that can be stored in the cache. */
-    max: () => max,
+    get available() {
+      return max - size;
+    },
   };
-}
+};

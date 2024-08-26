@@ -1,8 +1,10 @@
 {
   "include": ["src"],
   "compilerOptions": {
-    "target": "ES6",
+    "target": "ES2018",
+    "lib": ["ES2018"],
     "module": "CommonJS",
+    "moduleResolution": "Node",
     "outDir": "lib",
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
@@ -23,7 +25,6 @@
     "declaration": true,
     "declarationDir": "lib",
     "allowSyntheticDefaultImports": false,
-    "skipLibCheck": true,
-    "emitDeclarationOnly": true
+    "skipLibCheck": true
   }
 }

@@ -63,6 +63,20 @@
           }
         }
       }
+    },
+    {
+      "include": ["benchmark"],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noNodejsModules": "off"
+          },
+          "nursery": {
+            "useTopLevelRegex": "off",
+            "noUndeclaredDependencies": "off"
+          }
+        }
+      }
     }
   ]
 }
