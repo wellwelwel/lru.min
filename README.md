@@ -1,6 +1,12 @@
 <h1 align="center">lru.min</h1>
 <div align="center">
 
+[![NPM Version](https://img.shields.io/npm/v/lru.min.svg?label=&color=70a1ff&logo=npm&logoColor=white)](https://www.npmjs.com/package/lru.min)
+[![Coverage](https://img.shields.io/codecov/c/github/wellwelwel/lru.min?label=&logo=codecov&logoColor=white&color=98cc00)](https://github.com/wellwelwel/lru.min/tree/main/.nycrc)<br />
+[![GitHub Workflow Status (Node.js)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_node.yml?event=push&label=&branch=main&logo=nodedotjs&logoColor=535c68&color=badc58)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_node.yml?query=branch%3Amain)
+[![GitHub Workflow Status (Bun)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_bun.yml?event=push&label=&branch=main&logo=bun&logoColor=ffffff&color=f368e0)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_bun.yml?query=branch%3Amain)
+[![GitHub Workflow Status (Deno)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_deno.yml?event=push&label=&branch=main&logo=deno&logoColor=ffffff&color=079992)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_deno.yml?query=branch%3Amain)
+
 🔥 An extremely fast and efficient <strong><a href="https://en.m.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29">LRU</a> Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **6.4KB**.
 
 </div>
@@ -31,9 +37,6 @@ deno add npm:lru.min
 ---
 
 ## Usage
-
-> - ⚠️ Please wait until `v1.x.x` before using this package.
-> - 📘 Public repository coming soon.
 
 ### Import
 
@@ -266,8 +269,8 @@ See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main
 
 ## Acknowledgements
 
-> **lru.min** is based and inspired on the architecture and code of both [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
->
+**lru.min** is based and inspired on the architecture and code of both [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
+
 > For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
 
 - The architecture is mostly based on [@isaacs](https://github.com/isaacs) — [**lru-cache**](https://github.com/isaacs/node-lru-cache/blob/8f51d75351cbb4ac819952eb8e9f95eda00ef800/src/index.ts).
