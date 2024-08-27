@@ -1,3 +1,4 @@
+const process = require('node:process');
 const { cpuUsage } = require('node:process');
 const { performance } = require('node:perf_hooks');
 const { LRUCache } = require('lru-cache');

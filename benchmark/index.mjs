@@ -1,3 +1,4 @@
+import process from 'node:process';
 import { fork } from 'node:child_process';
 
 const benchmarks = ['lru-cache', 'quick-lru', 'lru.min'];
@@ -37,4 +38,7 @@ const runBenchmark = (benchmarkName) => {
   console.log('\nCPU:');
   for (const [name, result] of sortedByCpu)
     console.log(`  ${name}: ${result.cpu.toFixed(2)}µs`);
+
+  if (sortedByTime[0][0] !== 'lru.min' || sortedByCpu[0][0] !== 'lru.min')
+    process.exit(1);
 })();
