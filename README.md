@@ -7,7 +7,7 @@
 [![GitHub Workflow Status (Bun)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_bun.yml?event=push&label=&branch=main&logo=bun&logoColor=ffffff&color=f368e0)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_bun.yml?query=branch%3Amain)
 [![GitHub Workflow Status (Deno)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_deno.yml?event=push&label=&branch=main&logo=deno&logoColor=ffffff&color=079992)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_deno.yml?query=branch%3Amain)
 
-🔥 An extremely fast and efficient <strong><a href="https://en.m.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29">LRU</a> Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **6.4KB**.
+🔥 An extremely fast and efficient <strong><a href="https://en.m.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29">LRU</a> Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **6.7KB**.
 
 </div>
 
@@ -86,6 +86,8 @@ Adds a key-value pair to the cache. Updates the value if the key already exists
 ```ts
 LRU.set('key', 'value');
 ```
+
+> `undefined` keys will simply be ignored.
 
 ### Get a cache
 
@@ -207,55 +209,28 @@ LRU.forEach((key, value) => {
 
 The benchmark is performed by comparing `1,000,000` runs through a maximum cache limit of `100,000`, getting `333,333` caches and delenting `200,000` keys 10 consecutive times, clearing the cache every run.
 
-> You can see how the tests are run and compared in the [benchmark](https://github.com/wellwelwel/lru.min/tree/main/benchmark) directory.
->
 > - [**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.0.0`
 > - [**quick-lru**](https://github.com/sindresorhus/quick-lru) `v7.0.0`
 
-#### Node.js
-
 ```sh
-# ES Modules
-lru.min: 247.45ms
-lru-cache: 255.93ms
-quick-lru: 312.90ms
+# Time:
+  lru.min:    240.45ms
+  lru-cache:  258.32ms
+  quick-lru:  279.89ms
+
+# CPU:
+  lru.min:    275558.30µs
+  lru-cache:  306858.30µs
+  quick-lru:  401318.80µs
 ```
 
-```sh
-# CommonJS
-lru.min: 236.35ms
-lru-cache: 258.74ms
-quick-lru: not compatible
-```
-
-#### Bun
-
-```sh
-# ES Modules
-lru.min: 298.42ms
-quick-lru: 315.37ms
-lru-cache: 359.23ms
-```
-
-```sh
-# CommonJS
-lru.min: 363.79ms
-lru-cache: 371.39ms
-quick-lru: not compatible
-```
-
-#### Deno
-
-```sh
-# ES Modules
-lru.min: 222.60ms
-lru-cache: 227.80ms
-quick-lru: 253.00ms
-```
+- See detailed results and how the tests are run and compared in the [benchmark](https://github.com/wellwelwel/lru.min/tree/main/benchmark) directory.
 
 ---
 
 ## Security Policy
+
+[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_codeql.yml?event=push&label=&branch=main&logo=github&logoColor=white&color=f368e0)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_codeql.yml?query=branch%3Amain)
 
 Please check the [**SECURITY.md**](https://github.com/wellwelwel/lru.min/blob/main/SECURITY.md).
 

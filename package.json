@@ -1,7 +1,7 @@
 {
   "name": "lru.min",
   "version": "0.3.1",
-  "description": "🔥 An extremely fast and efficient LRU cache for JavaScript (Browser compatible) — 6.4KB.",
+  "description": "🔥 An extremely fast and efficient LRU cache for JavaScript (Browser compatible) — 6.7KB.",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
   "types": "./lib/index.d.ts",
@@ -28,7 +28,8 @@
     "deno": ">=1.30.0"
   },
   "scripts": {
-    "benchmark": "cd benchmark && npm ci && node lib/index.js",
+    "benchmark:esm": "cd benchmark && npm ci && node index.mjs",
+    "benchmark:cjs": "cd benchmark && npm ci && node index.cjs",
     "prebuild": "rm -rf ./browser ./lib",
     "build:browser": "tsx tools/browserfy.ts",
     "build:esm": "esbuild src/index.ts --outfile=lib/index.mjs --platform=node --target=node12 --format=esm",
@@ -52,7 +53,7 @@
     "packages-update": "^2.0.0",
     "poku": "^2.5.0",
     "prettier": "^3.3.3",
-    "tsx": "^4.17.0",
+    "tsx": "^4.19.0",
     "typescript": "^5.5.4"
   },
   "exports": {

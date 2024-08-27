@@ -108,6 +108,19 @@ describe('Size suite', () => {
         ['key6', 'value6'],
       ]
     );
+
+    for (let i = 100; i <= 1000; i++) LRU.set(`key${i}`, `value${i}`);
+
+    assert.deepStrictEqual(
+      [...LRU.entries()],
+      [
+        ['key1000', 'value1000'],
+        ['key999', 'value999'],
+        ['key998', 'value998'],
+        ['key996', 'value996'],
+        ['key995', 'value995'],
+      ]
+    );
   });
 
   it('should evict the specified number of items and update the size', () => {
@@ -133,6 +146,24 @@ describe('Size suite', () => {
         ['key6', 'value6'],
         ['key5', 'value5'],
         ['key4', 'value4'],
+      ]
+    );
+
+    for (let i = 100; i <= 1000; i++) LRU.set(`key${i}`, `value${i}`);
+
+    assert.deepStrictEqual(
+      [...LRU.entries()],
+      [
+        ['key1000', 'value1000'],
+        ['key999', 'value999'],
+        ['key998', 'value998'],
+        ['key997', 'value997'],
+        ['key996', 'value996'],
+        ['key995', 'value995'],
+        ['key994', 'value994'],
+        ['key993', 'value993'],
+        ['key992', 'value992'],
+        ['key991', 'value991'],
       ]
     );
   });
@@ -164,6 +195,83 @@ describe('Size suite', () => {
     assert.strictEqual(LRU.delete('key3'), false, 'Invalid key');
 
     assert.strictEqual(LRU.size, 9);
+
+    assert.deepStrictEqual(
+      [...LRU.entries()],
+      [
+        ['key10', 'value10'],
+        ['key9', 'value9'],
+        ['key8', 'value8'],
+        ['key7', 'value7'],
+        ['key6', 'value6'],
+        ['key5', 'value5'],
+        ['key4', 'value4'],
+        ['key2', 'value2'],
+        ['key1', 'value1'],
+      ]
+    );
+
+    LRU.set('key100', 'value100');
+
+    assert.deepStrictEqual(
+      [...LRU.entries()],
+      [
+        ['key100', 'value100'],
+        ['key10', 'value10'],
+        ['key9', 'value9'],
+        ['key8', 'value8'],
+        ['key7', 'value7'],
+        ['key6', 'value6'],
+        ['key5', 'value5'],
+        ['key4', 'value4'],
+        ['key2', 'value2'],
+        ['key1', 'value1'],
+      ]
+    );
+
+    LRU.delete('key1');
+    LRU.delete('key2');
+    LRU.delete('key3');
+    LRU.delete('key100');
+
+    assert.deepStrictEqual(
+      [...LRU.entries()],
+      [
+        ['key10', 'value10'],
+        ['key9', 'value9'],
+        ['key8', 'value8'],
+        ['key7', 'value7'],
+        ['key6', 'value6'],
+        ['key5', 'value5'],
+        ['key4', 'value4'],
+      ]
+    );
+
+    LRU.set('key100', 'value100');
+
+    assert.deepStrictEqual(
+      [...LRU.entries()],
+      [
+        ['key100', 'value100'],
+        ['key10', 'value10'],
+        ['key9', 'value9'],
+        ['key8', 'value8'],
+        ['key7', 'value7'],
+        ['key6', 'value6'],
+        ['key5', 'value5'],
+        ['key4', 'value4'],
+      ]
+    );
+
+    assert.strictEqual(LRU.has('key5'), true);
+    assert.strictEqual(LRU.peek('key5'), 'value5');
+    assert.strictEqual(LRU.get('key5'), 'value5');
+
+    LRU.delete('key5');
+
+    assert.strictEqual(LRU.has('key5'), false);
+    assert.strictEqual(LRU.peek('key5'), undefined);
+    assert.strictEqual(LRU.get('key5'), undefined);
   });
 
   it('should clear the cache', () => {

@@ -20,14 +20,14 @@ export const createLRU = <Key, Value>(options: {
   const next: number[] = new Array(max).fill(0);
   const prev: number[] = new Array(max).fill(0);
 
-  const moveToTail = (index: number): undefined => {
+  const setTail = (index: number, type: 'set' | 'get'): undefined => {
     if (index === tail) return;
 
     const nextIndex = next[index];
     const prevIndex = prev[index];
 
     if (index === head) head = nextIndex;
-    else if (prevIndex !== 0) next[prevIndex] = nextIndex;
+    else if (type === 'get' || prevIndex !== 0) next[prevIndex] = nextIndex;
 
     if (nextIndex !== 0) prev[nextIndex] = prevIndex;
 
@@ -54,12 +54,16 @@ export const createLRU = <Key, Value>(options: {
 
     if (size === 0) head = tail = 0;
 
+    free.push(evictHead);
+
     return evictHead;
   };
 
   return {
     /** Adds a key-value pair to the cache. Updates the value if the key already exists. */
     set(key: Key, value: Value): undefined {
+      if (key === undefined) return;
+
       let index = keyMap.get(key);
 
       if (index === undefined) {
@@ -72,7 +76,7 @@ export const createLRU = <Key, Value>(options: {
       valList[index] = value;
 
       if (size === 1) head = tail = index;
-      else moveToTail(index);
+      else setTail(index, 'set');
     },
 
     /** Retrieves the value for a given key and moves the key to the most recent position. */
@@ -80,8 +84,8 @@ export const createLRU = <Key, Value>(options: {
       const index = keyMap.get(key);
 
       if (index === undefined) return;
+      if (index !== tail) setTail(index, 'get');
 
-      moveToTail(index);
       return valList[index];
     },
 
@@ -143,20 +147,27 @@ export const createLRU = <Key, Value>(options: {
     delete(key: Key): boolean {
       const index = keyMap.get(key);
 
-      if (index !== undefined) {
-        onEviction?.(key, valList[index]!);
-        keyMap.delete(key);
-        free.push(index);
+      if (index === undefined) return false;
 
-        keyList[index] = undefined;
-        valList[index] = undefined;
+      onEviction?.(key, valList[index]!);
+      keyMap.delete(key);
+      free.push(index);
 
-        size--;
+      keyList[index] = undefined;
+      valList[index] = undefined;
 
-        return true;
-      }
+      const prevIndex = prev[index];
+      const nextIndex = next[index];
 
-      return false;
+      if (prevIndex !== 0) next[prevIndex] = nextIndex;
+      if (nextIndex !== 0) prev[nextIndex] = prevIndex;
+
+      if (index === head) head = nextIndex;
+      if (index === tail) tail = prevIndex;
+
+      size--;
+
+      return true;
     },
 
     /** Evicts the oldest item or the specified number of the oldest items from the cache. */

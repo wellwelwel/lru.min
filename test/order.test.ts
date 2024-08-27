@@ -21,6 +21,19 @@ describe('Order Suite', () => {
         ['key1', 'value1'],
       ]
     );
+
+    assert.strictEqual(LRU.get('key2'), 'value2');
+    assert.strictEqual(LRU.get('key1'), 'value1');
+
+    assert.deepStrictEqual(
+      [...LRU.entries()],
+      [
+        ['key1', 'value1'],
+        ['key2', 'value2'],
+        ['key3', 'value3'],
+        ['key4', 'value4'],
+      ]
+    );
   });
 
   it('should not change the order when an item is peeked', () => {
