@@ -28,7 +28,8 @@
     "deno": ">=1.30.0"
   },
   "scripts": {
-    "benchmark": "cd benchmark && npm ci && node index.mjs",
+    "benchmark:esm": "cd benchmark && npm ci && node index.mjs",
+    "benchmark:cjs": "cd benchmark && npm ci && node index.cjs",
     "prebuild": "rm -rf ./browser ./lib",
     "build:browser": "tsx tools/browserfy.ts",
     "build:esm": "esbuild src/index.ts --outfile=lib/index.mjs --platform=node --target=node12 --format=esm",

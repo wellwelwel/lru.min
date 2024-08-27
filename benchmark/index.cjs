@@ -1,69 +1,42 @@
-const { performance } = require('node:perf_hooks');
-const { LRUCache } = require('lru-cache');
-const { createLRU } = require('../lib/index.js');
+const { fork } = require('node:child_process');
 
+const benchmarks = ['lru-cache', 'lru.min'];
 const results = new Map();
 
-const measurePerformance = (fn) => {
-  const startTime = performance.now();
+const runBenchmark = (benchmarkName) => {
+  return new Promise((resolve) => {
+    const child = fork('worker.cjs', [benchmarkName]);
 
-  fn();
-
-  const endTime = performance.now();
-
-  return {
-    time: endTime - startTime,
-  };
-};
-
-const times = 10;
-const max = 100000;
-const brute = 1000000;
-
-const benchmark = (createCache) => {
-  const cache = createCache();
-  const results = { time: 0 };
-
-  for (let i = 0; i < times; i++) {
-    const result = measurePerformance(() => {
-      for (let j = 0; j < brute; j++) {
-        cache.set(`key-${j}`, j);
-
-        if (j > 0 && j % 3 === 0) {
-          const randomIndex = Math.floor(Math.random() * j);
-          cache.get(`key-${randomIndex}`);
-        }
-
-        if (j > 0 && j % 5 === 0) {
-          const randomIndex = Math.floor(Math.random() * j);
-          cache.delete(`key-${randomIndex}`);
-        }
-      }
+    child.on('message', (result) => {
+      resolve(result);
     });
 
-    results.time += result.time;
-
-    cache.clear();
-  }
-
-  return {
-    time: results.time / times,
-  };
+    child.on('exit', () => {
+      resolve(null);
+    });
+  });
 };
 
-results.set(
-  'lru-cache',
-  benchmark(() => new LRUCache({ max }))
-);
-results.set(
-  'lru.min',
-  benchmark(() => createLRU({ max }))
-);
+(async () => {
+  for (const benchmark of benchmarks) {
+    const result = await runBenchmark(benchmark);
+    results.set(benchmark, result);
+  }
 
-const time = [...results.entries()].sort((a, b) => a[1].time - b[1].time);
+  const sortedByTime = [...results.entries()].sort(
+    (a, b) => a[1].time - b[1].time
+  );
+  const sortedByCpu = [...results.entries()].sort(
+    (a, b) => a[1].cpu - b[1].cpu
+  );
 
-console.log('CommonJS');
+  console.log('Time:');
+  for (const [name, result] of sortedByTime)
+    console.log(`  ${name}: ${result.time.toFixed(2)}ms`);
+  console.log('  quick-lru: not compatible');
 
-for (const [name, result] of time)
-  console.log(`${name}: ${result.time.toFixed(2)}ms`);
-console.log('quick-lru: not compatible');
+  console.log('\nCPU:');
+  for (const [name, result] of sortedByCpu)
+    console.log(`  ${name}: ${result.cpu.toFixed(2)}µs`);
+  console.log('  quick-lru: not compatible');
+})();

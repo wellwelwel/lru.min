@@ -216,44 +216,76 @@ The benchmark is performed by comparing `1,000,000` runs through a maximum cache
 
 #### Node.js
 
-```sh
-# ES Modules
-lru.min: 247.45ms
-lru-cache: 255.93ms
-quick-lru: 312.90ms
-```
+- ES Modules
 
 ```sh
-# CommonJS
-lru.min: 236.35ms
-lru-cache: 258.74ms
-quick-lru: not compatible
+# Time:
+  lru.min:    240.45ms
+  lru-cache:  258.32ms
+  quick-lru:  279.89ms
+
+# CPU:
+  lru.min:    275558.30µs
+  lru-cache:  306858.30µs
+  quick-lru:  401318.80µs
+```
+
+- CommonJS
+
+```sh
+# Time:
+  lru.min:    242.86ms
+  lru-cache:  264.30ms
+  quick-lru:  not compatible
+
+# CPU:
+  lru.min:    280118.00µs
+  lru-cache:  310327.20µs
+  quick-lru:  not compatible
 ```
 
 #### Bun
 
-```sh
-# ES Modules
-lru.min: 298.42ms
-quick-lru: 315.37ms
-lru-cache: 359.23ms
-```
+- ES Modules
 
 ```sh
-# CommonJS
-lru.min: 363.79ms
-lru-cache: 371.39ms
-quick-lru: not compatible
+# Time:
+  lru.min:    298.42ms
+  quick-lru:  315.37ms
+  lru-cache:  359.23ms
+
+# CPU:
+  lru.min:    401869.50µs
+  quick-lru:  478517.40µs
+  lru-cache:  510357.60µs
+```
+
+- CommonJS
+
+```sh
+# Time:
+  lru.min:    324.41ms
+  lru-cache:  370.22ms
+  quick-lru:  not compatible
+
+# CPU:
+  lru.min:    396790.50µs
+  lru-cache:  488574.50µs
+  quick-lru:  not compatible
 ```
 
 #### Deno
 
+- ES Modules
+
 ```sh
-# ES Modules
-lru.min: 222.60ms
-lru-cache: 227.80ms
-quick-lru: 253.00ms
+# Time:
+  lru.min:    222.60ms
+  lru-cache:  227.80ms
+  quick-lru:  253.00ms
 ```
+
+> **Deno** benchmarks were carried out without an isolated process.
 
 ---
 
