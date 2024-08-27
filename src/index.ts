@@ -20,14 +20,14 @@ export const createLRU = <Key, Value>(options: {
   const next: number[] = new Array(max).fill(0);
   const prev: number[] = new Array(max).fill(0);
 
-  const moveToTail = (index: number): undefined => {
+  const setTail = (index: number, type: 'set' | 'get'): undefined => {
     if (index === tail) return;
 
     const nextIndex = next[index];
     const prevIndex = prev[index];
 
     if (index === head) head = nextIndex;
-    else if (prevIndex !== 0) next[prevIndex] = nextIndex;
+    else if (type === 'get' || prevIndex !== 0) next[prevIndex] = nextIndex;
 
     if (nextIndex !== 0) prev[nextIndex] = prevIndex;
 
@@ -74,7 +74,7 @@ export const createLRU = <Key, Value>(options: {
       valList[index] = value;
 
       if (size === 1) head = tail = index;
-      else moveToTail(index);
+      else setTail(index, 'set');
     },
 
     /** Retrieves the value for a given key and moves the key to the most recent position. */
@@ -83,7 +83,8 @@ export const createLRU = <Key, Value>(options: {
 
       if (index === undefined) return;
 
-      moveToTail(index);
+      if (index !== tail) setTail(index, 'get');
+
       return valList[index];
     },
 
