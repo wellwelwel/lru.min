@@ -1,9 +1,9 @@
 import { describe, it, assert } from 'poku';
-import { createLRU } from '../src/index.js';
+import { createLRU } from '../src/index.ts';
 
 describe('Order Suite', () => {
   it('should move accessed item to the most recent position', () => {
-    const LRU = createLRU<string, string>({ max: 5, debug: true });
+    const LRU = createLRU<string, string>({ max: 5 });
 
     LRU.set('key1', 'value1');
     LRU.set('key2', 'value2');

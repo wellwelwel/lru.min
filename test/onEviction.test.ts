@@ -1,5 +1,5 @@
 import { describe, it, assert } from 'poku';
-import { createLRU } from '../src/index.js';
+import { createLRU } from '../src/index.ts';
 
 describe('On eviction suite', () => {
   it('should evict the least recently used item when max size is exceeded and trigger onEviction', () => {
