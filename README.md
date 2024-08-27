@@ -198,7 +198,7 @@ const entries = [...LRU.entries()];
 Iterates over each key-value pair in the cache, from most recent to least recent.
 
 ```ts
-LRU.forEach((key, value) => {
+LRU.forEach((value, key) => {
   // do something
 });
 ```
@@ -224,7 +224,7 @@ The benchmark is performed by comparing `1,000,000` runs through a maximum cache
   quick-lru:  401318.80µs
 ```
 
-- See detailed results and how the tests are run and compared in the [benchmark](https://github.com/wellwelwel/lru.min/tree/main/benchmark) directory.
+- See detailed results and how the tests are run and compared in the [**benchmark**](https://github.com/wellwelwel/lru.min/tree/main/benchmark) directory.
 
 ---
 
