@@ -54,6 +54,8 @@ export const createLRU = <Key, Value>(options: {
 
     if (size === 0) head = tail = 0;
 
+    free.push(evictHead);
+
     return evictHead;
   };
 
@@ -143,20 +145,27 @@ export const createLRU = <Key, Value>(options: {
     delete(key: Key): boolean {
       const index = keyMap.get(key);
 
-      if (index !== undefined) {
-        onEviction?.(key, valList[index]!);
-        keyMap.delete(key);
-        free.push(index);
+      if (index === undefined) return false;
 
-        keyList[index] = undefined;
-        valList[index] = undefined;
+      onEviction?.(key, valList[index]!);
+      keyMap.delete(key);
+      free.push(index);
 
-        size--;
+      keyList[index] = undefined;
+      valList[index] = undefined;
 
-        return true;
-      }
+      const prevIndex = prev[index];
+      const nextIndex = next[index];
 
-      return false;
+      if (prevIndex !== 0) next[prevIndex] = nextIndex;
+      if (nextIndex !== 0) prev[nextIndex] = prevIndex;
+
+      if (index === head) head = nextIndex;
+      if (index === tail) tail = prevIndex;
+
+      size--;
+
+      return true;
     },
 
     /** Evicts the oldest item or the specified number of the oldest items from the cache. */
