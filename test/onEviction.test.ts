@@ -65,6 +65,8 @@ describe('On eviction suite', () => {
   });
 
   it('should retain only the most recent items within max size and trigger onEviction', () => {
+    const salt =
+      'V$IE@Uz+=fCMnl/FctdRjDf#amCmnvsEf1R031^MT8Mv6Pykjq:wgFYtvnbZ1|dWJQYHef3Av!wh0joP&ABdUVGQC%Xrya9vMvt3KA22`TYXcAUNiKaQZIG1"Hq1FFYu0n,SCCJZZGCQIq"uF2V8O9t*U7qRmJQm[rVR2Z}pl';
     const evicteds: [string, string][] = [];
     const LRU = createLRU<string, string>({
       max: 2,
@@ -73,7 +75,7 @@ describe('On eviction suite', () => {
       },
     });
 
-    for (let i = 1; i <= 100_000; i++) LRU.set(`key${i}`, `value${i}`);
+    for (let i = 1; i <= 100_000; i++) LRU.set(`key:${salt}:${i}`, `value${i}`);
 
     for (let i = 100_000 - LRU.max; i > 100_000; i--) {
       assert.strictEqual(LRU.has(`key${i}`), false);
@@ -82,8 +84,8 @@ describe('On eviction suite', () => {
     assert.deepStrictEqual(
       [...LRU.entries()],
       [
-        ['key100000', 'value100000'],
-        ['key99999', 'value99999'],
+        [`key:${salt}:100000`, 'value100000'],
+        [`key:${salt}:99999`, 'value99999'],
       ]
     );
 
@@ -145,6 +147,19 @@ describe('On eviction suite', () => {
     LRU.evict(3);
 
     assert.strictEqual(LRU.size, 7);
+
+    assert.deepStrictEqual(
+      [...LRU.entries()],
+      [
+        ['key10', 'value10'],
+        ['key9', 'value9'],
+        ['key8', 'value8'],
+        ['key7', 'value7'],
+        ['key6', 'value6'],
+        ['key5', 'value5'],
+        ['key4', 'value4'],
+      ]
+    );
 
     assert.deepStrictEqual(evicteds, [
       ['key1', 'value1'],
