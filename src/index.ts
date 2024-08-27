@@ -3,9 +3,8 @@ export const createLRU = <Key, Value>(options: {
   max: number;
   /** Function called when an item is evicted from the cache. */
   onEviction?: (key: Key, value: Value) => unknown;
-  debug?: boolean;
 }) => {
-  let { max, onEviction, debug } = options;
+  let { max, onEviction } = options;
 
   if (!(Number.isInteger(max) && max > 0))
     throw new TypeError('`max` must be a positive integer');
@@ -257,12 +256,6 @@ export const createLRU = <Key, Value>(options: {
     /** Returns the number of currently available slots in the cache before reaching the maximum size. */
     get available() {
       return max - size;
-    },
-
-    get debug() {
-      return debug === true
-        ? { tail, head, keyMap, keyList, valList, prev, next, free }
-        : undefined;
     },
   };
 };
