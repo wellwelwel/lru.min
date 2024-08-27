@@ -87,6 +87,8 @@ Adds a key-value pair to the cache. Updates the value if the key already exists
 LRU.set('key', 'value');
 ```
 
+> `undefined` keys will simply be ignored.
+
 ### Get a cache
 
 Retrieves the value for a given key and moves the key to the most recent position.
