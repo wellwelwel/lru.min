@@ -1,7 +1,7 @@
 {
   "name": "lru.min",
-  "version": "0.3.0",
-  "description": "🔥 An extremely fast and efficient LRU cache for JavaScript (Browser compatible) — 6.5KB.",
+  "version": "0.3.1",
+  "description": "🔥 An extremely fast and efficient LRU cache for JavaScript (Browser compatible) — 6.4KB.",
   "main": "./lib/index.js",
   "module": "./lib/index.mjs",
   "types": "./lib/index.d.ts",
