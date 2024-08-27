@@ -1,0 +1,31 @@
+name: '🪟 CI'
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+    name: Windows
+    steps:
+      - name: ➕ Actions - Checkout
+        uses: actions/checkout@v4
+
+      - name: ➕ Actions - Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+          cache: 'npm'
+
+      - name: 📦 Installing Dependencies
+        run: npm ci
+
+      - name: 🧪 Checking for Coverage
+        run: npm run test:node

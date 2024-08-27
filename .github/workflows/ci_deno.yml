@@ -1,0 +1,42 @@
+name: '🦕 CI - Compatibility'
+
+on:
+  push:
+    branches:
+      - 'main'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    strategy:
+      fail-fast: false
+    name: Deno
+    steps:
+      - name: ➕ Actions - Checkout
+        uses: actions/checkout@v4
+
+      - name: ➕ Actions - Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.x'
+
+      - name: ➕ Actions - Setup Deno
+        uses: denoland/setup-deno@v1
+        with:
+          deno-version: 'v1.x'
+
+      - name: ➕ Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: npm-linux-${{ hashFiles('package-lock.json') }}
+          restore-keys: npm-linux-
+
+      - name: 📦 Installing Dependencies
+        run: npm ci
+
+      - name: 🧪 Checking for Coverage
+        run: deno task test:deno
