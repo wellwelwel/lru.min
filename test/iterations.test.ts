@@ -1,5 +1,5 @@
 import { describe, it, assert } from 'poku';
-import { createLRU } from '../src/index.js';
+import { createLRU } from '../src/index.ts';
 
 describe('Iterations Suite', () => {
   it('Keys', () => {

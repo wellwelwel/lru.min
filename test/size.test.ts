@@ -1,5 +1,5 @@
 import { describe, it, assert } from 'poku';
-import { createLRU } from '../src/index.js';
+import { createLRU } from '../src/index.ts';
 
 describe('Size suite', () => {
   it('should throw when `max` is invalid', () => {
