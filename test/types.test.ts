@@ -131,9 +131,19 @@ const snapshop = {
 };
 
 describe('Types Suite', () => {
+  it('should not match an undefined key', () => {
+    const LRU = createLRU<unknown, unknown>({ max: 5 });
+    const key = undefined;
+
+    LRU.set(key, snapshop);
+
+    assert.deepStrictEqual(LRU.get(key), undefined);
+
+    assert.deepStrictEqual([...LRU.entries()], []);
+  });
+
   it('should match a symbol key', () => {
     const LRU = createLRU<unknown, unknown>({ max: 5 });
-
     const key = Symbol('undefined');
 
     LRU.set(key, snapshop);
@@ -145,7 +155,6 @@ describe('Types Suite', () => {
 
   it('should match an object key', () => {
     const LRU = createLRU<unknown, unknown>({ max: 5 });
-
     const key = {
       test: true,
     };
@@ -156,20 +165,8 @@ describe('Types Suite', () => {
     assert.deepStrictEqual([...LRU.entries()], [[key, snapshop]]);
   });
 
-  it('should match an intentional undefined key', () => {
-    const LRU = createLRU<unknown, unknown>({ max: 5 });
-
-    const key = undefined;
-
-    LRU.set(key, snapshop);
-
-    assert.deepStrictEqual(LRU.get(key), snapshop);
-    assert.deepStrictEqual([...LRU.entries()], [[key, snapshop]]);
-  });
-
   it('should match an number key', () => {
     const LRU = createLRU<unknown, unknown>({ max: 5 });
-
     const key = 941235;
 
     LRU.set(key, snapshop);
@@ -180,7 +177,6 @@ describe('Types Suite', () => {
 
   it('should match a number key', () => {
     const LRU = createLRU<unknown, unknown>({ max: 5 });
-
     const key = 941235;
 
     LRU.set(key, snapshop);
@@ -191,7 +187,6 @@ describe('Types Suite', () => {
 
   it('should match a big int key', () => {
     const LRU = createLRU<unknown, unknown>({ max: 5 });
-
     const key = 941283745934857639487563945235n;
 
     LRU.set(key, snapshop);
@@ -202,7 +197,6 @@ describe('Types Suite', () => {
 
   it('should match a multi line key', () => {
     const LRU = createLRU<unknown, unknown>({ max: 5 });
-
     const key = `
       ln
     `;
@@ -215,7 +209,6 @@ describe('Types Suite', () => {
 
   it('should match a `false` key', () => {
     const LRU = createLRU<unknown, unknown>({ max: 5 });
-
     const key = false;
 
     LRU.set(key, snapshop);
@@ -226,7 +219,6 @@ describe('Types Suite', () => {
 
   it('should match a `true` key', () => {
     const LRU = createLRU<unknown, unknown>({ max: 5 });
-
     const key = true;
 
     LRU.set(key, snapshop);
@@ -246,7 +238,6 @@ describe('Types Suite', () => {
 
   it('should match an emoji key', () => {
     const LRU = createLRU<unknown, unknown>({ max: 5 });
-
     const key = '🧑🏻‍🔬';
 
     LRU.set(key, snapshop);
@@ -257,7 +248,6 @@ describe('Types Suite', () => {
 
   it('should match an emoji key', () => {
     const LRU = createLRU<unknown, unknown>({ max: 5 });
-
     const key = '🧑🏻‍🔬';
 
     LRU.set(key, snapshop);
@@ -268,7 +258,6 @@ describe('Types Suite', () => {
 
   it('should match an ideogram key', () => {
     const LRU = createLRU<unknown, unknown>({ max: 5 });
-
     const key = 'テスト試験בדיקה测试測試тест';
 
     LRU.set(key, snapshop);

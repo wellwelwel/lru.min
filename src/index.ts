@@ -62,6 +62,8 @@ export const createLRU = <Key, Value>(options: {
   return {
     /** Adds a key-value pair to the cache. Updates the value if the key already exists. */
     set(key: Key, value: Value): undefined {
+      if (key === undefined) return;
+
       let index = keyMap.get(key);
 
       if (index === undefined) {
