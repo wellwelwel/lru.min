@@ -50,18 +50,18 @@ describe('Iterations Suite', () => {
     const LRU = createLRU<string, string>({ max: 5 });
     const iterations: [string, string][] = [];
 
-    LRU.set('key1', 'value1');
-    LRU.set('key2', 'value2');
-    LRU.set('key3', 'value3');
-    LRU.set('key4', 'value4');
+    LRU.set('key:🐷:1', 'value1');
+    LRU.set('key:🐷:2', 'value2');
+    LRU.set('key:🐷:3', 'value3');
+    LRU.set('key:🐷:4', 'value4');
 
     LRU.forEach((value, key) => iterations.push([value, key]));
 
     assert.deepStrictEqual(iterations, [
-      ['value4', 'key4'],
-      ['value3', 'key3'],
-      ['value2', 'key2'],
-      ['value1', 'key1'],
+      ['value4', 'key:🐷:4'],
+      ['value3', 'key:🐷:3'],
+      ['value2', 'key:🐷:2'],
+      ['value1', 'key:🐷:1'],
     ]);
   });
 });

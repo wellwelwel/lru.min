@@ -122,6 +122,19 @@ describe('Size suite', () => {
     LRU.evict(3);
 
     assert.strictEqual(LRU.size, 7);
+
+    assert.deepStrictEqual(
+      [...LRU.entries()],
+      [
+        ['key10', 'value10'],
+        ['key9', 'value9'],
+        ['key8', 'value8'],
+        ['key7', 'value7'],
+        ['key6', 'value6'],
+        ['key5', 'value5'],
+        ['key4', 'value4'],
+      ]
+    );
   });
 
   it('should ignore resize', () => {
