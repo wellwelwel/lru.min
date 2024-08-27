@@ -5,17 +5,9 @@
 
 </div>
 
-## Why
+## Why another LRU?
 
-#### 🤝 Compatibility
-
-- **lru.min** ensures is fully compatible with both **Node.js** _(8+)_, **Bun**, **Deno** and, browser environments.
-
-🎖️ Performance
-
-- [Check comparisons between **Node.js**, **Bun** and **Deno**](#performance).
-
-> Note that although performance is indeed important, the main purpose behind **lru.min** is the high compatibility level.
+- 🎖️ **lru.min** is fully compatible with both **Node.js** _(8+)_, **Bun**, **Deno** and, browser environments. All of this, while maintaining the same high performance _(and a little more)_.
 
 ---
 

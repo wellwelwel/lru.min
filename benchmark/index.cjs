@@ -1,6 +1,6 @@
 const { performance } = require('node:perf_hooks');
 const { LRUCache } = require('lru-cache');
-import { createLRU } from '../lib/index.js';
+const { createLRU } = require('../lib/index.js');
 
 const results = new Map();
 

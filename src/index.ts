@@ -3,8 +3,9 @@ export const createLRU = <Key, Value>(options: {
   max: number;
   /** Function called when an item is evicted from the cache. */
   onEviction?: (key: Key, value: Value) => unknown;
+  debug?: boolean;
 }) => {
-  let { max, onEviction } = options;
+  let { max, onEviction, debug } = options;
 
   if (!(Number.isInteger(max) && max > 0))
     throw new TypeError('`max` must be a positive integer');
@@ -24,16 +25,16 @@ export const createLRU = <Key, Value>(options: {
     if (index === tail) return;
 
     const nextIndex = next[index];
+    const prevIndex = prev[index];
 
     if (index === head) head = nextIndex;
-    else {
-      const prevIndex = prev[index];
-      next[prevIndex] = nextIndex;
-      prev[nextIndex] = prevIndex;
-    }
+    else if (prevIndex !== 0) next[prevIndex] = nextIndex;
+
+    if (nextIndex !== 0) prev[nextIndex] = prevIndex;
 
     next[tail] = index;
     prev[index] = tail;
+    next[index] = 0;
     tail = index;
   };
 
@@ -47,7 +48,12 @@ export const createLRU = <Key, Value>(options: {
     keyList[evictHead] = undefined;
     valList[evictHead] = undefined;
     head = next[evictHead];
+
+    if (head !== 0) prev[head] = 0;
+
     size--;
+
+    if (size === 0) head = tail = 0;
 
     return evictHead;
   };
@@ -66,7 +72,8 @@ export const createLRU = <Key, Value>(options: {
 
       valList[index] = value;
 
-      moveToTail(index);
+      if (size === 1) head = tail = index;
+      else moveToTail(index);
     },
 
     /** Retrieves the value for a given key and moves the key to the most recent position. */
@@ -91,37 +98,37 @@ export const createLRU = <Key, Value>(options: {
 
     /** Iterates over all keys in the cache, from least recent to most recent. */
     *keys(): IterableIterator<Key> {
-      let current = head;
+      let current = tail;
 
       for (let i = 0; i < size; i++) {
         yield keyList[current]!;
-        current = next[current];
+        current = prev[current];
       }
     },
 
     /** Iterates over all values in the cache, from least recent to most recent. */
     *values(): IterableIterator<Value> {
-      let current = head;
+      let current = tail;
 
       for (let i = 0; i < size; i++) {
         yield valList[current]!;
-        current = next[current];
+        current = prev[current];
       }
     },
 
     /** Iterates over `[key, value]` pairs in the cache, from least recent to most recent. */
     *entries(): IterableIterator<[Key, Value]> {
-      let current = head;
+      let current = tail;
 
       for (let i = 0; i < size; i++) {
         yield [keyList[current]!, valList[current]!];
-        current = next[current];
+        current = prev[current];
       }
     },
 
     /** Iterates over each key-value pair in the cache, from most recent to least recent. */
     forEach: (callback: (value: Value, key: Key) => unknown): undefined => {
-      let current = head;
+      let current = tail;
 
       for (let i = 0; i < size; i++) {
         const key = keyList[current]!;
@@ -129,7 +136,7 @@ export const createLRU = <Key, Value>(options: {
 
         callback(value, key);
 
-        current = next[current];
+        current = prev[current];
       }
     },
 
@@ -182,9 +189,59 @@ export const createLRU = <Key, Value>(options: {
       if (!(Number.isInteger(newMax) && newMax > 0))
         throw new TypeError('`max` must be a positive integer');
 
-      max = newMax;
+      if (newMax === max) return;
 
-      while (size > max) _evict();
+      if (newMax < max) {
+        let current = tail;
+
+        const preserve = Math.min(size, newMax);
+        const remove = size - preserve;
+        const newKeyList: (Key | undefined)[] = new Array(newMax);
+        const newValList: (Value | undefined)[] = new Array(newMax);
+        const newNext: number[] = new Array(newMax);
+        const newPrev: number[] = new Array(newMax);
+
+        for (let i = 1; i <= remove; i++)
+          onEviction?.(keyList[i]!, valList[i]!);
+
+        for (let i = preserve - 1; i >= 0; i--) {
+          newKeyList[i] = keyList[current];
+          newValList[i] = valList[current];
+          newNext[i] = i + 1;
+          newPrev[i] = i - 1;
+          keyMap.set(newKeyList[i]!, i);
+          current = prev[current];
+        }
+
+        head = 0;
+        tail = preserve - 1;
+        size = preserve;
+
+        keyList.length = newMax;
+        valList.length = newMax;
+        next.length = newMax;
+        prev.length = newMax;
+
+        for (let i = 0; i < preserve; i++) {
+          keyList[i] = newKeyList[i];
+          valList[i] = newValList[i];
+          next[i] = newNext[i];
+          prev[i] = newPrev[i];
+        }
+
+        free = [];
+
+        for (let i = preserve; i < newMax; i++) free.push(i);
+      } else {
+        const fill = newMax - max;
+
+        keyList.push(...new Array(fill).fill(undefined));
+        valList.push(...new Array(fill).fill(undefined));
+        next.push(...new Array(fill).fill(0));
+        prev.push(...new Array(fill).fill(0));
+      }
+
+      max = newMax;
     },
 
     /** Returns the maximum number of items that can be stored in the cache. */
@@ -200,6 +257,12 @@ export const createLRU = <Key, Value>(options: {
     /** Returns the number of currently available slots in the cache before reaching the maximum size. */
     get available() {
       return max - size;
+    },
+
+    get debug() {
+      return debug === true
+        ? { tail, head, keyMap, keyList, valList, prev, next, free }
+        : undefined;
     },
   };
 };
