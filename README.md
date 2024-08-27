@@ -32,9 +32,6 @@ deno add npm:lru.min
 
 ## Usage
 
-> - ⚠️ Please wait until `v1.x.x` before using this package.
-> - 📘 Public repository coming soon.
-
 ### Import
 
 #### ES Modules
