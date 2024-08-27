@@ -82,7 +82,6 @@ export const createLRU = <Key, Value>(options: {
       const index = keyMap.get(key);
 
       if (index === undefined) return;
-
       if (index !== tail) setTail(index, 'get');
 
       return valList[index];
