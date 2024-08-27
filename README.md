@@ -32,9 +32,6 @@ deno add npm:lru.min
 
 ## Usage
 
-> - ⚠️ Please wait until `v1.x.x` before using this package.
-> - 📘 Public repository coming soon.
-
 ### Import
 
 #### ES Modules
@@ -266,8 +263,8 @@ See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main
 
 ## Acknowledgements
 
-> **lru.min** is based and inspired on the architecture and code of both [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
->
+**lru.min** is based and inspired on the architecture and code of both [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
+
 > For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
 
 - The architecture is mostly based on [@isaacs](https://github.com/isaacs) — [**lru-cache**](https://github.com/isaacs/node-lru-cache/blob/8f51d75351cbb4ac819952eb8e9f95eda00ef800/src/index.ts).
