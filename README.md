@@ -44,12 +44,14 @@ deno add npm:lru.min
 import { createLRU } from 'lru.min';
 
 const max = 2;
-
 const onEviction = (key, value) => {
   console.log(`Key "${key}" with value "${value}" has been evicted.`);
 };
 
-const LRU = createLRU({ max, onEviction });
+const LRU = createLRU({
+  max,
+  onEviction,
+});
 
 LRU.set('A', 'My Value');
 LRU.set('B', 'Other Value');
@@ -63,11 +65,19 @@ LRU.delete('B');
 
 // => Key "B" with value "Other Value" has been evicted.
 
+LRU.peek('C');
+
 LRU.clear(); // LRU.evict(max)
 
 // => Key "C" with value "Another Value" has been evicted.
 
 LRU.set('D', "You're amazing 💛");
+
+LRU.available; // 1
+
+LRU.resize(10);
+
+LRU.available; // 9
 ```
 
 > For _up-to-date_ documentation, always follow the [**README.md**](https://github.com/wellwelwel/lru.min?tab=readme-ov-file#readme) in the **GitHub** repository.
