@@ -38,6 +38,39 @@ deno add npm:lru.min
 
 ## Usage
 
+### Quickstart
+
+```js
+import { createLRU } from 'lru.min';
+
+const LRU = createLRU({
+  max: 2,
+  onEviction: (key, value) => {
+    console.log(`Key "${key}" with value "${value}" has been evicted.`);
+  },
+});
+
+LRU.set('A', 'My Value');
+LRU.set('B', 'Other Value');
+LRU.set('C', 'Another Value');
+
+// => Key "A" with value "My Value" has been evicted.
+
+LRU.has('B');
+LRU.get('B');
+LRU.delete('B');
+
+// => Key "B" with value "Other Value" has been evicted.
+
+LRU.clear();
+
+// => Key "C" with value "Another Value" has been evicted.
+
+LRU.set('D', "You're amazing 💛");
+```
+
+> For _up-to-date_ documentation, always follow the [**README.md**](https://github.com/wellwelwel/lru.min?tab=readme-ov-file#readme) in the **GitHub** repository.
+
 ### Import
 
 #### ES Modules
@@ -63,8 +96,6 @@ const { createLRU } = require('lru.min');
 > Set maximum size when creating **LRU**.
 
 ```ts
-import { createLRU } from 'lru.min';
-
 const LRU = createLRU({ max: 150_000 });
 ```
 
@@ -124,6 +155,11 @@ Evicts the specified number of the oldest items from the cache.
 ```ts
 LRU.evict(1000);
 ```
+
+> [!TIP]
+>
+> - Methods that perform eviction(s) when maximum size is reached: `set` and `resize`.
+> - Methods that always perform eviction(s): `delete`, `clear`, and `evict` itself.
 
 ### Resize the cache
 
