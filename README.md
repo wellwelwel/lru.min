@@ -13,7 +13,7 @@
 
 ## Why another LRU?
 
-- 🎖️ **lru.min** is fully compatible with both **Node.js** _(8+)_, **Bun**, **Deno** and, browser environments. All of this, while maintaining the same high performance _(and a little more)_.
+- 🎖️ **lru.min** is fully compatible with both **Node.js** _(8+)_, **Bun**, **Deno** and, browser environments. All of this, while maintaining the same high performance [_(and a little more)_](https://github.com/wellwelwel/lru.min?tab=readme-ov-file#performance).
 
 ---
 
@@ -102,7 +102,7 @@ LRU.get('key');
 Retrieves the value for a given key without changing its position.
 
 ```ts
-LRU.get('key');
+LRU.peek('key');
 ```
 
 ### Check if a key exists
@@ -161,9 +161,11 @@ LRU.size;
 LRU.available;
 ```
 
+### Iterating the cache
+
 #### Get all keys
 
-Iterates over all keys in the cache, from least recent to most recent.
+Iterates over all keys in the cache, from most recent to least recent.
 
 ```ts
 const keys = [...LRU.keys()];
@@ -171,7 +173,7 @@ const keys = [...LRU.keys()];
 
 #### Get all values
 
-Iterates over all values in the cache, from least recent to most recent.
+Iterates over all values in the cache, from most recent to least recent.
 
 ```ts
 const keys = [...LRU.values()];
@@ -179,15 +181,7 @@ const keys = [...LRU.values()];
 
 #### Get all entries
 
-Iterates over `[key, value]` pairs in the cache, from least recent to most recent.
-
-```ts
-const entries = [...LRU.entries()];
-```
-
-#### Get all entries
-
-Iterates over `[key, value]` pairs in the cache, from least recent to most recent.
+Iterates over `[key, value]` pairs in the cache, from most recent to least recent.
 
 ```ts
 const entries = [...LRU.entries()];
@@ -195,7 +189,7 @@ const entries = [...LRU.entries()];
 
 #### Run a callback for each entry
 
-Iterates over each key-value pair in the cache, from most recent to least recent.
+Iterates over each value-key pair in the cache, from most recent to least recent.
 
 ```ts
 LRU.forEach((value, key) => {
@@ -246,11 +240,39 @@ See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main
 
 **lru.min** is based and inspired on the architecture and code of both [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
 
-> For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
+For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
 
 - The architecture is mostly based on [@isaacs](https://github.com/isaacs) — [**lru-cache**](https://github.com/isaacs/node-lru-cache/blob/8f51d75351cbb4ac819952eb8e9f95eda00ef800/src/index.ts).
 - Most of the methods names and its functionalities were inspired by [@sindresorhus](https://github.com/sindresorhus) — [**quick-lru**](https://github.com/sindresorhus/quick-lru/blob/a2262c65e1952539cb4d985a67c46363a780d234/index.js).
 - [![Contributors](https://img.shields.io/github/contributors/wellwelwel/lru.min?label=Contributors)](https://github.com/wellwelwel/lru.min/graphs/contributors)
+
+---
+
+#### What comes from [**lru-cache**](https://github.com/isaacs/node-lru-cache)?
+
+- _Not the same, but majority based on:_
+
+```ts
+let free: number[] = [];
+
+const keyMap: Map<Key, number> = new Map();
+const keyList: (Key | undefined)[] = new Array(max).fill(undefined);
+const valList: (Value | undefined)[] = new Array(max).fill(undefined);
+const next: number[] = new Array(max).fill(0);
+const prev: number[] = new Array(max).fill(0);
+```
+
+---
+
+#### What comes from [**quick-lru**](https://github.com/sindresorhus/quick-lru)?
+
+Name of methods and options _(including its final functionality idea)_:
+
+- `resize`
+- `peek`
+- `onEviction`
+- `forEach`
+- `entriesDescending` as `entries`
 
 ---
 

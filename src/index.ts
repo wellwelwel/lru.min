@@ -99,7 +99,7 @@ export const createLRU = <Key, Value>(options: {
     /** Checks if a key exists in the cache. */
     has: (key: Key): boolean => keyMap.has(key),
 
-    /** Iterates over all keys in the cache, from least recent to most recent. */
+    /** Iterates over all keys in the cache, from most recent to least recent. */
     *keys(): IterableIterator<Key> {
       let current = tail;
 
@@ -109,7 +109,7 @@ export const createLRU = <Key, Value>(options: {
       }
     },
 
-    /** Iterates over all values in the cache, from least recent to most recent. */
+    /** Iterates over all values in the cache, from most recent to least recent. */
     *values(): IterableIterator<Value> {
       let current = tail;
 
@@ -119,7 +119,7 @@ export const createLRU = <Key, Value>(options: {
       }
     },
 
-    /** Iterates over `[key, value]` pairs in the cache, from least recent to most recent. */
+    /** Iterates over `[key, value]` pairs in the cache, from most recent to least recent. */
     *entries(): IterableIterator<[Key, Value]> {
       let current = tail;
 
@@ -129,7 +129,7 @@ export const createLRU = <Key, Value>(options: {
       }
     },
 
-    /** Iterates over each key-value pair in the cache, from most recent to least recent. */
+    /** Iterates over each value-key pair in the cache, from most recent to least recent. */
     forEach: (callback: (value: Value, key: Key) => unknown): undefined => {
       let current = tail;
 
