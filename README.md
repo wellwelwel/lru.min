@@ -266,10 +266,10 @@ const prev: number[] = new Array(max).fill(0);
 
 #### What comes from [**quick-lru**](https://github.com/sindresorhus/quick-lru)?
 
-Name of methods and options:
+Name of methods and options _(including its final functionality idea)_:
 
-- `resize` _(including its final functionality)_
-- `peek` _(including its final functionality)_
+- `resize`
+- `peek`
 - `onEviction`
 - `forEach`
 - `entriesDescending` as `entries`
