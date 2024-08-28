@@ -73,10 +73,14 @@ LRU.clear(); // LRU.evict(max)
 
 LRU.set('D', "You're amazing 💛");
 
+LRU.size; // 1
+LRU.max; // 2
 LRU.available; // 1
 
 LRU.resize(10);
 
+LRU.size; // 1
+LRU.max; // 10
 LRU.available; // 9
 ```
 
