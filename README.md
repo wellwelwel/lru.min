@@ -248,6 +248,23 @@ LRU.forEach((value, key) => {
 });
 ```
 
+### TypeScript
+
+You can set types for both keys and values. For example:
+
+```ts
+type Key = number;
+
+type Value = {
+  name: string;
+};
+
+const LRU = createLRU<Key, Value>({ max: 1000 });
+
+LRU.set(1, { name: 'Peter' });
+LRU.set(2, { name: 'Mary' });
+```
+
 ---
 
 ### Performance
