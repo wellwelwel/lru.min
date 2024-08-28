@@ -69,6 +69,8 @@ LRU.clear();
 LRU.set('D', "You're amazing 💛");
 ```
 
+> For _up-to-date_ documentation, always follow the [**README.md**](https://github.com/wellwelwel/lru.min?tab=readme-ov-file#readme) in the **GitHub** repository.
+
 ### Import
 
 #### ES Modules
