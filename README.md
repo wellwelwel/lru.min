@@ -96,8 +96,6 @@ const { createLRU } = require('lru.min');
 > Set maximum size when creating **LRU**.
 
 ```ts
-import { createLRU } from 'lru.min';
-
 const LRU = createLRU({ max: 150_000 });
 ```
 
@@ -157,6 +155,11 @@ Evicts the specified number of the oldest items from the cache.
 ```ts
 LRU.evict(1000);
 ```
+
+> [!TIP]
+>
+> - Methods that perform eviction(s) when maximum size is reached: `set` and `resize`.
+> - Methods that always perform eviction(s): `delete`, `clear`, and `evict` itself.
 
 ### Resize the cache
 
