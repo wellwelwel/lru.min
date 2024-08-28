@@ -40,10 +40,10 @@ deno add npm:lru.min
 
 ### Quickstart
 
-```ts
+```js
 import { createLRU } from 'lru.min';
 
-const LRU = createLRU<any, any>({
+const LRU = createLRU({
   max: 2,
   onEviction: (key, value) => {
     console.log(`Key "${key}" with value "${value}" has been evicted.`);
