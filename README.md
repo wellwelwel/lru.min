@@ -227,7 +227,7 @@ const keys = [...LRU.keys()];
 Iterates over all values in the cache, from most recent to least recent.
 
 ```ts
-const keys = [...LRU.values()];
+const values = [...LRU.values()];
 ```
 
 #### Get all entries
