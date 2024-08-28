@@ -43,12 +43,13 @@ deno add npm:lru.min
 ```js
 import { createLRU } from 'lru.min';
 
-const LRU = createLRU({
-  max: 2,
-  onEviction: (key, value) => {
-    console.log(`Key "${key}" with value "${value}" has been evicted.`);
-  },
-});
+const max = 2;
+
+const onEviction = (key, value) => {
+  console.log(`Key "${key}" with value "${value}" has been evicted.`);
+};
+
+const LRU = createLRU({ max, onEviction });
 
 LRU.set('A', 'My Value');
 LRU.set('B', 'Other Value');
@@ -62,7 +63,7 @@ LRU.delete('B');
 
 // => Key "B" with value "Other Value" has been evicted.
 
-LRU.clear();
+LRU.clear(); // LRU.evict(max)
 
 // => Key "C" with value "Another Value" has been evicted.
 
@@ -286,7 +287,9 @@ For more comprehensive features such as **TTL** support, consider using and supp
 
 #### What comes from [**lru-cache**](https://github.com/isaacs/node-lru-cache)?
 
-- _Not the same, but majority based on:_
+Architecture's essence:
+
+> _It's not the same code, but majority based on [this](https://github.com/isaacs/node-lru-cache/blob/8f51d75351cbb4ac819952eb8e9f95eda00ef800/src/index.ts#L1385-L1394)._
 
 ```ts
 let free: number[] = [];
@@ -302,7 +305,7 @@ const prev: number[] = new Array(max).fill(0);
 
 #### What comes from [**quick-lru**](https://github.com/sindresorhus/quick-lru)?
 
-Name of methods and options _(including its final functionality idea)_:
+Name of methods and options _(including their final functionality ideas)_:
 
 - `resize`
 - `peek`
