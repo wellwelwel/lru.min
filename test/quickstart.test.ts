@@ -29,9 +29,9 @@ describe('Quickstart example test', () => {
       ]
     );
 
-    LRU.has('B');
-    LRU.get('B');
-    LRU.delete('B');
+    assert.strictEqual(LRU.has('B'), true);
+    assert.strictEqual(LRU.get('B'), 'Other Value');
+    assert.strictEqual(LRU.delete('B'), true);
 
     assert.deepStrictEqual(evicteds, [
       'Key "A" with value "My Value" has been evicted.',
@@ -39,7 +39,7 @@ describe('Quickstart example test', () => {
     ]);
     assert.deepStrictEqual([...LRU.entries()], [['C', 'Another Value']]);
 
-    LRU.peek('C');
+    assert.strictEqual(LRU.peek('C'), 'Another Value');
 
     LRU.clear();
 
@@ -98,9 +98,9 @@ describe('Quickstart example test', () => {
       ]
     );
 
-    LRU.has('B');
-    LRU.get('B');
-    LRU.delete('B');
+    assert.strictEqual(LRU.has('B'), true);
+    assert.strictEqual(LRU.get('B'), 'Other Value');
+    assert.strictEqual(LRU.delete('B'), true);
 
     assert.deepStrictEqual(evicteds, [
       'Key "A" with value "My Value" has been evicted.',
@@ -108,7 +108,7 @@ describe('Quickstart example test', () => {
     ]);
     assert.deepStrictEqual([...LRU.entries()], [['C', 'Another Value']]);
 
-    LRU.peek('C');
+    assert.strictEqual(LRU.peek('C'), 'Another Value');
 
     LRU.evict(max);
 
