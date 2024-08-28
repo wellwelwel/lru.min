@@ -1,11 +1,11 @@
-export type LRUOptions<Key = unknown, Value = unknown> = {
+export type CacheOptions<Key = unknown, Value = unknown> = {
   /** Maximum number of items the cache can hold. */
   max: number;
   /** Function called when an item is evicted from the cache. */
   onEviction?: (key: Key, value: Value) => unknown;
 };
 
-export const createLRU = <Key, Value>(options: LRUOptions<Key, Value>) => {
+export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
   let { max, onEviction } = options;
 
   if (!(Number.isInteger(max) && max > 0))

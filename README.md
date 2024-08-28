@@ -270,7 +270,7 @@ LRU.set(2, { name: 'Mary' });
 Also:
 
 ```ts
-import { createLRU, type LRUOptions } from 'lru.min';
+import { createLRU, type CacheOptions } from 'lru.min';
 
 type Key = number;
 
@@ -278,7 +278,7 @@ type Value = {
   name: string;
 };
 
-const options: LRUOptions<Key, Value> = {
+const options: CacheOptions<Key, Value> = {
   max: 10,
   onEviction(key, value) {
     console.log(key, value);

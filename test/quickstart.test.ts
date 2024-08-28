@@ -1,5 +1,5 @@
 import { describe, it, assert } from 'poku';
-import { createLRU, type LRUOptions } from '../src/index.ts';
+import { createLRU, type CacheOptions } from '../src/index.ts';
 
 describe('Quickstart example test', () => {
   it('Default', () => {
@@ -141,7 +141,7 @@ describe('Quickstart example test', () => {
   });
 
   it('Type Test', () => {
-    const options: LRUOptions = {
+    const options: CacheOptions = {
       max: 10,
       onEviction(key, value) {
         console.log(key, value);
@@ -151,8 +151,8 @@ describe('Quickstart example test', () => {
     createLRU(options);
   });
 
-  it('Type Test: Params on `LRUOptions`', () => {
-    const options: LRUOptions<number, string> = {
+  it('Type Test: Params on `CacheOptions`', () => {
+    const options: CacheOptions<number, string> = {
       max: 10,
       onEviction(key, value) {
         console.log(key, value);
@@ -165,7 +165,7 @@ describe('Quickstart example test', () => {
   });
 
   it('Type Test: Params in `createLRU`', () => {
-    const options: LRUOptions = {
+    const options: CacheOptions = {
       max: 10,
       onEviction(key, value) {
         console.log(key, value);
@@ -184,7 +184,7 @@ describe('Quickstart example test', () => {
       name: string;
     };
 
-    const options: LRUOptions<Key, Value> = {
+    const options: CacheOptions<Key, Value> = {
       max: 10,
       onEviction(key, value) {
         console.log(key, value);
