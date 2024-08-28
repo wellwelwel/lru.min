@@ -253,6 +253,8 @@ LRU.forEach((value, key) => {
 You can set types for both keys and values. For example:
 
 ```ts
+import { createLRU } from 'lru.min';
+
 type Key = number;
 
 type Value = {
@@ -260,6 +262,31 @@ type Value = {
 };
 
 const LRU = createLRU<Key, Value>({ max: 1000 });
+
+LRU.set(1, { name: 'Peter' });
+LRU.set(2, { name: 'Mary' });
+```
+
+Also:
+
+```ts
+import { createLRU, type LRUOptions } from 'lru.min';
+
+type Key = number;
+
+type Value = {
+  name: string;
+};
+
+const options: LRUOptions<Key, Value> = {
+  max: 10,
+  onEviction(key, value) {
+    console.log(key, value);
+  },
+};
+
+// No need to repeat the type params
+const LRU = createLRU(options);
 
 LRU.set(1, { name: 'Peter' });
 LRU.set(2, { name: 'Mary' });

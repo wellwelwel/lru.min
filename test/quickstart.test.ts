@@ -1,5 +1,5 @@
 import { describe, it, assert } from 'poku';
-import { createLRU } from '../src/index.ts';
+import { createLRU, type LRUOptions } from '../src/index.ts';
 
 describe('Quickstart example test', () => {
   it('Default', () => {
@@ -138,5 +138,62 @@ describe('Quickstart example test', () => {
       'Key "B" with value "Other Value" has been evicted.',
       'Key "C" with value "Another Value" has been evicted.',
     ]);
+  });
+
+  it('Type Test', () => {
+    const options: LRUOptions = {
+      max: 10,
+      onEviction(key, value) {
+        console.log(key, value);
+      },
+    };
+
+    createLRU(options);
+  });
+
+  it('Type Test: Params on `LRUOptions`', () => {
+    const options: LRUOptions<number, string> = {
+      max: 10,
+      onEviction(key, value) {
+        console.log(key, value);
+      },
+    };
+
+    createLRU(options).set(1, 'Test');
+    // @ts-expect-error
+    createLRU<number, string>(options).set('2', 'Test');
+  });
+
+  it('Type Test: Params in `createLRU`', () => {
+    const options: LRUOptions = {
+      max: 10,
+      onEviction(key, value) {
+        console.log(key, value);
+      },
+    };
+
+    createLRU<number, string>(options).set(1, 'Test');
+    // @ts-expect-error
+    createLRU<number, string>(options).set('2', 'Test');
+  });
+
+  it('Type Test: README.md', () => {
+    type Key = number;
+
+    type Value = {
+      name: string;
+    };
+
+    const options: LRUOptions<Key, Value> = {
+      max: 10,
+      onEviction(key, value) {
+        console.log(key, value);
+      },
+    };
+
+    const LRU = createLRU(options);
+
+    LRU.set(1, { name: 'Peter' });
+    LRU.set(2, { name: 'Mary' });
   });
 });
