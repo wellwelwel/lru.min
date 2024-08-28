@@ -38,6 +38,37 @@ deno add npm:lru.min
 
 ## Usage
 
+### Quickstart
+
+```ts
+import { createLRU } from 'lru.min';
+
+const LRU = createLRU<any, any>({
+  max: 2,
+  onEviction: (key, value) => {
+    console.log(`Key "${key}" with value "${value}" has been evicted.`);
+  },
+});
+
+LRU.set('A', 'My Value');
+LRU.set('B', 'Other Value');
+LRU.set('C', 'Another Value');
+
+// => Key "A" with value "My Value" has been evicted.
+
+LRU.has('B');
+LRU.get('B');
+LRU.delete('B');
+
+// => Key "B" with value "Other Value" has been evicted.
+
+LRU.clear();
+
+// => Key "C" with value "Another Value" has been evicted.
+
+LRU.set('D', "You're amazing 💛");
+```
+
 ### Import
 
 #### ES Modules
