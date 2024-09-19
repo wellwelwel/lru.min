@@ -2,6 +2,7 @@
 <div align="center">
 
 [![NPM Version](https://img.shields.io/npm/v/lru.min.svg?label=&color=70a1ff&logo=npm&logoColor=white)](https://www.npmjs.com/package/lru.min)
+[![NPM Downloads](https://img.shields.io/npm/dm/lru.min.svg?label=&logo=npm&logoColor=white&color=45aaf2)](https://www.npmjs.com/package/lru.min)
 [![Coverage](https://img.shields.io/codecov/c/github/wellwelwel/lru.min?label=&logo=codecov&logoColor=white&color=98cc00)](https://app.codecov.io/gh/wellwelwel/lru.min)<br />
 [![GitHub Workflow Status (Node.js)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_node.yml?event=push&label=&branch=main&logo=nodedotjs&logoColor=535c68&color=badc58)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_node.yml?query=branch%3Amain)
 [![GitHub Workflow Status (Bun)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_bun.yml?event=push&label=&branch=main&logo=bun&logoColor=ffffff&color=f368e0)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_bun.yml?query=branch%3Amain)
@@ -13,7 +14,7 @@
 
 ## Why another LRU?
 
-- 🎖️ **lru.min** is fully compatible with both **Node.js** _(8+)_, **Bun**, **Deno** and, browser environments. All of this, while maintaining the same high performance [_(and a little more)_](https://github.com/wellwelwel/lru.min?tab=readme-ov-file#performance).
+- 🎖️ **lru.min** is fully compatible with both **Node.js** _(8+)_, **Bun**, **Deno** and, browser environments. All of this, while maintaining the same high performance [_(and a little more)_](https://github.com/wellwelwel/lru.min?tab=readme-ov-file#performance) as the most popular **LRU** packages.
 
 ---
 
@@ -296,7 +297,7 @@ LRU.set(2, { name: 'Mary' });
 
 ### Performance
 
-The benchmark is performed by comparing `1,000,000` runs through a maximum cache limit of `100,000`, getting `333,333` caches and delenting `200,000` keys 10 consecutive times, clearing the cache every run.
+The benchmark is performed by comparing `1,000,000` runs through a maximum cache limit of `100,000`, getting `333,333` caches and deleting `200,000` keys 10 consecutive times, clearing the cache every run.
 
 > - [**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.0.0`
 > - [**quick-lru**](https://github.com/sindresorhus/quick-lru) `v7.0.0`

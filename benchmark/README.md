@@ -1,6 +1,6 @@
 # Benchmark
 
-The benchmark is performed by comparing `1,000,000` runs through a maximum cache limit of `100,000`, getting `333,333` caches and delenting `200,000` keys 10 consecutive times, clearing the cache every run.
+The benchmark is performed by comparing `1,000,000` runs through a maximum cache limit of `100,000`, getting `333,333` caches and deleting `200,000` keys 10 consecutive times, clearing the cache every run.
 
 > - [**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.0.0`
 > - [**quick-lru**](https://github.com/sindresorhus/quick-lru) `v7.0.0`
