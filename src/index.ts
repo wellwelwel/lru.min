@@ -184,8 +184,15 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
     /** Clears all key-value pairs from the cache. */
     clear(): undefined {
-      for (const index of keyMap.values())
-        onEviction?.(keyList[index]!, valList[index]!);
+      const iterator = keyMap.values();
+
+      if (typeof onEviction === 'function')
+        for (
+          let result = iterator.next();
+          !result.done;
+          result = iterator.next()
+        )
+          onEviction(keyList[result.value]!, valList[result.value]!);
 
       keyMap.clear();
       keyList.fill(undefined);
