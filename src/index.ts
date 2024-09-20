@@ -1,8 +1,7 @@
-import { performance } from 'node:perf_hooks';
-
 export type CacheOptions<Key = unknown, Value = unknown> = {
   /** Maximum number of items the cache can hold. */
   max: number;
+  /** Maximum age (in ms) for items before they are considered stale. */
   maxAge?: number;
   /** Function called when an item is evicted from the cache. */
   onEviction?: (key: Key, value: Value) => unknown;
@@ -17,7 +16,13 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
   if (typeof maxAge === 'number' && maxAge <= 0)
     throw new TypeError('`maxAge` must be a positive number');
 
-  const Age = typeof performance?.now === 'object' ? performance : Date;
+  const Age = (() => {
+    try {
+      return typeof performance.now === 'function' ? performance : Date;
+    } catch {
+      return Date;
+    }
+  })();
 
   let size = 0;
   let head = 0;
@@ -114,6 +119,35 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
     }
 
     return true;
+  };
+
+  const _debug = (key: Key) => {
+    const index = keyMap.get(key);
+
+    if (index === undefined) return;
+
+    const ageItem = ageList[index];
+    const expiresAt = expList[index];
+    const now = Age.now();
+    const timeRemaining = expiresAt !== 0 ? expiresAt - now : 0;
+    const isExpired = expiresAt !== 0 && now > expiresAt;
+
+    let current = tail;
+    let position = 0;
+
+    while (current !== index && current !== 0) {
+      current = prev[current];
+      position++;
+    }
+
+    return {
+      key,
+      value: valList[index],
+      maxAge: ageItem,
+      expiresAt: timeRemaining > 0 ? timeRemaining : 0,
+      isExpired,
+      position,
+    };
   };
 
   return {
@@ -342,6 +376,39 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       }
 
       max = newMax;
+    },
+
+    *debug(key?: Key): Generator<
+      | {
+          /** Item key. */
+          key: Key;
+          /** Item value. */
+          value: Value | undefined;
+          /** Time in milliseconds. */
+          maxAge: number;
+          /** Time in milliseconds. */
+          expiresAt: number;
+          /** When it's `true`, the next interaction with the key will evict it. */
+          isExpired: boolean;
+          /** From the most recent (`0`) to the oldest (`max`). */
+          position: number;
+        }
+      | undefined
+    > {
+      if (key !== undefined) {
+        const result = _debug(key);
+
+        if (result) yield result;
+
+        return;
+      }
+
+      let current = tail;
+
+      for (let i = 0; i < size; i++) {
+        yield _debug(keyList[current]!);
+        current = prev[current];
+      }
     },
 
     /** Returns the maximum number of items that can be stored in the cache. */

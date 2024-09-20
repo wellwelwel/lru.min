@@ -8,7 +8,7 @@
 [![GitHub Workflow Status (Bun)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_bun.yml?event=push&label=&branch=main&logo=bun&logoColor=ffffff&color=f368e0)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_bun.yml?query=branch%3Amain)
 [![GitHub Workflow Status (Deno)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_deno.yml?event=push&label=&branch=main&logo=deno&logoColor=ffffff&color=079992)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_deno.yml?query=branch%3Amain)
 
-🔥 An extremely fast and efficient <strong><a href="https://en.m.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29">LRU</a> Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **6.8KB**.
+🔥 An extremely fast and efficient <strong><a href="https://en.m.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29">LRU</a> Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **8.8KB**.
 
 </div>
 
@@ -45,6 +45,7 @@ deno add npm:lru.min
 import { createLRU } from 'lru.min';
 
 const max = 2;
+const maxAge = 300000; // 5m
 const onEviction = (key, value) => {
   console.log(`Key "${key}" with value "${value}" has been evicted.`);
 };
@@ -52,6 +53,7 @@ const onEviction = (key, value) => {
 const LRU = createLRU({
   max,
   onEviction,
+  maxAge,
 });
 
 LRU.set('A', 'My Value');
@@ -72,7 +74,9 @@ LRU.clear(); // LRU.evict(max)
 
 // => Key "C" with value "Another Value" has been evicted.
 
-LRU.set('D', "You're amazing 💛");
+LRU.set('D', "You're amazing 💛", {
+  maxAge: Number.POSITIVE_INFINITY,
+});
 
 LRU.size; // 1
 LRU.max; // 2
@@ -83,6 +87,30 @@ LRU.resize(10);
 LRU.size; // 1
 LRU.max; // 10
 LRU.available; // 9
+
+LRU.set('E', 'Yet Another Value');
+
+[...LRU.debug()];
+/**
+ * [
+ *  {
+ *     key: 'E',
+ *     value: 'Yet Another Value',
+ *     maxAge: 300000,
+ *     expiresAt: 299999.90000000596,
+ *     isExpired: false,
+ *     position: 0
+ *  },
+ *  {
+ *     key: 'D',
+ *     value: "You're amazing 💛",
+ *     maxAge: Infinity,
+ *     expiresAt: Infinity,
+ *     isExpired: false,
+ *     position: 1
+ *  },
+ * ]
+ */
 ```
 
 > For _up-to-date_ documentation, always follow the [**README.md**](https://github.com/wellwelwel/lru.min?tab=readme-ov-file#readme) in the **GitHub** repository.

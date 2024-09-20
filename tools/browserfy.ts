@@ -4,9 +4,10 @@ import { transformAsync } from '@babel/core';
 import { minify } from 'terser';
 
 (async () => {
-  const contents = (await readFile('src/index.ts', 'utf8'))
-    .replace(/export const/gim, 'window.')
-    .replace(/import { performance } from 'node:perf_hooks';/gim, '');
+  const contents = (await readFile('src/index.ts', 'utf8')).replace(
+    /export const/gim,
+    'window.'
+  );
 
   const result = await esbuild.build({
     stdin: {

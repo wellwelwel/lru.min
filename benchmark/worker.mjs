@@ -21,7 +21,7 @@ const measurePerformance = (fn) => {
   };
 };
 
-const times = 100;
+const times = 10;
 const max = 100000;
 const brute = 1000000;
 
