@@ -103,9 +103,13 @@ const { createLRU } = require('lru.min');
 
 #### Browser
 
+> Requires **ES6**.
+
 ```html
 <script src="https://cdn.jsdelivr.net/npm/lru.min/browser/lru.min.js"></script>
 ```
+
+- You can use tools such as [**Babel**](https://github.com/babel/babel) to increase the compatibility rate.
 
 ### Create a new LRU Cache
 
