@@ -368,7 +368,7 @@ See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main
 
 **lru.min** is based and inspired on the architecture and code of both [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
 
-For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
+For more comprehensive features, consider using and supporting them 🤝
 
 - The architecture is mostly based on [@isaacs](https://github.com/isaacs) — [**lru-cache**](https://github.com/isaacs/node-lru-cache/blob/8f51d75351cbb4ac819952eb8e9f95eda00ef800/src/index.ts).
 - Most of the methods names and its functionalities were inspired by [@sindresorhus](https://github.com/sindresorhus) — [**quick-lru**](https://github.com/sindresorhus/quick-lru/blob/a2262c65e1952539cb4d985a67c46363a780d234/index.js).
