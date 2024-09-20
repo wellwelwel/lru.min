@@ -1,23 +1,37 @@
 export type CacheOptions<Key = unknown, Value = unknown> = {
   /** Maximum number of items the cache can hold. */
   max: number;
-  /** Maximum age (in ms) for items before they are considered stale. */
-  maxAge?: number;
-  /** Function called when an item is evicted from the cache. */
+  /**
+   * Maximum age (in ms) for items before they are considered stale.
+   *
+   * @default undefined
+   */
+  stale?: number;
+  /**
+   * When `true` and `stale` is set, items remain stale based on their initial expiration.
+   *
+   * @default undefined
+   */
+  keepStale?: boolean;
+  /**
+   * Function called when an item is evicted from the cache.
+   *
+   * @default undefined
+   */
   onEviction?: (key: Key, value: Value) => unknown;
 };
 
 export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
-  let { max, onEviction, maxAge = undefined } = options;
+  let { max, onEviction, stale, keepStale } = options;
 
   if (!(Number.isInteger(max) && max > 0))
     throw new TypeError('`max` must be a positive integer');
 
   if (
-    (typeof maxAge !== 'undefined' && typeof maxAge !== 'number') ||
-    (typeof maxAge === 'number' && maxAge <= 0)
+    (typeof stale !== 'undefined' && typeof stale !== 'number') ||
+    (typeof stale === 'number' && stale <= 0)
   )
-    throw new TypeError('`maxAge` must be a positive number');
+    throw new TypeError('`stale` must be a positive number');
 
   const Age = (() => {
     try {
@@ -133,7 +147,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
     const expiresAt = expList[index];
     const now = Age.now();
     const timeRemaining = expiresAt !== 0 ? expiresAt - now : 0;
-    const isExpired = expiresAt !== 0 && now > expiresAt;
+    const isStale = expiresAt !== 0 && now > expiresAt;
 
     let current = tail;
     let position = 0;
@@ -148,14 +162,14 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       value: valList[index],
       maxAge: ageItem,
       expiresAt: timeRemaining > 0 ? timeRemaining : 0,
-      isExpired,
+      isStale,
       position,
     };
   };
 
   return {
     /** Adds a key-value pair to the cache. Updates the value if the key already exists. */
-    set(key: Key, value: Value, options?: { maxAge?: number }): undefined {
+    set(key: Key, value: Value, options?: { stale?: number }): undefined {
       if (key === undefined) return;
 
       let index = keyMap.get(key);
@@ -169,14 +183,14 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
       valList[index] = value;
 
-      const keyMaxAge = options?.maxAge !== undefined ? options.maxAge : maxAge;
+      const keyMaxAge = options?.stale !== undefined ? options.stale : stale;
 
       if (keyMaxAge !== undefined) {
         if (
-          (typeof maxAge !== 'undefined' && typeof maxAge !== 'number') ||
-          (typeof maxAge === 'number' && maxAge <= 0)
+          (typeof stale !== 'undefined' && typeof stale !== 'number') ||
+          (typeof stale === 'number' && stale <= 0)
         )
-          throw new TypeError('`maxAge` must be a positive number');
+          throw new TypeError('`stale` must be a positive number');
 
         expList[index] = Age.now() + keyMaxAge;
         ageList[index] = keyMaxAge;
@@ -198,9 +212,12 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
       if (index !== tail) setTail(index, 'get');
 
-      const itemMaxAge = ageList[index];
-      if (itemMaxAge !== 0) {
-        expList[index] = Age.now() + itemMaxAge;
+      if (keepStale !== true) {
+        const itemMaxAge = ageList[index];
+
+        if (itemMaxAge !== 0) {
+          expList[index] = Age.now() + itemMaxAge;
+        }
       }
 
       return valList[index];
@@ -221,9 +238,12 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       if (index === undefined) return false;
       if (!_checkAge(key)) return false;
 
-      const itemMaxAge = ageList[index];
-      if (itemMaxAge !== 0) {
-        expList[index] = Age.now() + itemMaxAge;
+      if (keepStale !== true) {
+        const itemMaxAge = ageList[index];
+
+        if (itemMaxAge !== 0) {
+          expList[index] = Age.now() + itemMaxAge;
+        }
       }
 
       return true;
@@ -270,8 +290,8 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
           maxAge: number;
           /** Time in milliseconds. */
           expiresAt: number;
-          /** When it's `true`, the next interaction with the key will evict it. */
-          isExpired: boolean;
+          /** When `true`, the next interaction with the key will evict it. */
+          isStale: boolean;
           /** From the most recent (`0`) to the oldest (`max`). */
           position: number;
         }
