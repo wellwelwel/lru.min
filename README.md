@@ -45,7 +45,7 @@ deno add npm:lru.min
 import { createLRU } from 'lru.min';
 
 const max = 2;
-const maxAge = 300000; // 5m
+const maxAge = 300000;
 const onEviction = (key, value) => {
   console.log(`Key "${key}" with value "${value}" has been evicted.`);
 };
