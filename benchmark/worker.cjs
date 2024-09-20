@@ -1,5 +1,4 @@
 const process = require('node:process');
-const { cpuUsage } = require('node:process');
 const { performance } = require('node:perf_hooks');
 const { LRUCache } = require('lru-cache');
 const { createLRU } = require('../lib/index.js');
@@ -8,12 +7,12 @@ const benchmarkName = process.argv[2];
 
 const measurePerformance = (fn) => {
   const startTime = performance.now();
-  const startCpu = cpuUsage();
+  const startCpu = process.cpuUsage();
 
   fn();
 
   const endTime = performance.now();
-  const endCpu = cpuUsage(startCpu);
+  const endCpu = process.cpuUsage(startCpu);
 
   return {
     time: endTime - startTime,
@@ -21,13 +20,19 @@ const measurePerformance = (fn) => {
   };
 };
 
-const times = 10;
+const times = 100;
 const max = 100000;
 const brute = 1000000;
 
 const benchmarks = {
-  'lru-cache': () => new LRUCache({ max }),
-  'lru.min': () => createLRU({ max }),
+  'lru-cache': () => {
+    let event = 0;
+    return new LRUCache({ max, ttl: 1000, dispose: () => event++ });
+  },
+  'lru.min': () => {
+    let event = 0;
+    return createLRU({ max, maxAge: 1000, onEviction: () => event++ });
+  },
 };
 
 const benchmark = (createCache) => {

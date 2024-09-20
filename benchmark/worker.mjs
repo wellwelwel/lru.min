@@ -21,14 +21,27 @@ const measurePerformance = (fn) => {
   };
 };
 
-const times = 10;
+const times = 100;
 const max = 100000;
 const brute = 1000000;
 
 const benchmarks = {
-  'lru-cache': () => new LRUCache({ max }),
-  'quick-lru': () => new QuickLRU({ maxSize: max }),
-  'lru.min': () => createLRU({ max }),
+  'lru-cache': () => {
+    let event = 0;
+    return new LRUCache({ max, ttl: 1000, dispose: () => event++ });
+  },
+  'quick-lru': () => {
+    let event = 0;
+    return new QuickLRU({
+      maxSize: max,
+      maxAge: 1000,
+      onEviction: () => event++,
+    });
+  },
+  'lru.min': () => {
+    let event = 0;
+    return createLRU({ max, maxAge: 1000, onEviction: () => event++ });
+  },
 };
 
 const benchmark = (createCache) => {
@@ -57,7 +70,7 @@ const benchmark = (createCache) => {
     results.time += result.time;
     results.cpu += result.cpu;
 
-    cache.clear();
+    // cache.clear(); // quick-lru doesn't evict on `clear`
   }
 
   return {
