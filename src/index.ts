@@ -161,7 +161,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       key,
       value: valList[index],
       maxAge: ageItem,
-      expiresAt: timeRemaining > 0 ? timeRemaining : 0,
+      staleAt: timeRemaining > 0 ? timeRemaining : 0,
       isStale,
       position,
     };
@@ -290,7 +290,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
           /** Time in milliseconds. */
           maxAge: number;
           /** Time in milliseconds. */
-          expiresAt: number;
+          staleAt: number;
           /** When `true`, the next interaction with the key will evict it. */
           isStale: boolean;
           /** From the most recent (`0`) to the oldest (`max`). */

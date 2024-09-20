@@ -44,15 +44,13 @@ deno add npm:lru.min
 ```js
 import { createLRU } from 'lru.min';
 
-const max = 2;
-const staleAt = 300000;
 const onEviction = (key, value) => {
   console.log(`Key "${key}" with value "${value}" has been evicted.`);
 };
 
 const LRU = createLRU({
-  max,
-  staleAt,
+  max: 2,
+  staleAt: 300000,
   onEviction,
 });
 
@@ -75,7 +73,7 @@ LRU.clear(); // LRU.evict(max)
 // => Key "C" with value "Another Value" has been evicted.
 
 LRU.set('D', "You're amazing 💛", {
-  maxAge: Number.POSITIVE_INFINITY,
+  staleAt: Number.POSITIVE_INFINITY,
 });
 
 LRU.size; // 1
@@ -97,16 +95,16 @@ LRU.set('E', 'Yet Another Value');
  *     key: 'E',
  *     value: 'Yet Another Value',
  *     maxAge: 300000,
- *     expiresAt: 299999.90000000596,
- *     isExpired: false,
+ *     staleAt: 299999.90000000596,
+ *     isStale: false,
  *     position: 0
  *  },
  *  {
  *     key: 'D',
  *     value: "You're amazing 💛",
  *     maxAge: Infinity,
- *     expiresAt: Infinity,
- *     isExpired: false,
+ *     staleAt: Infinity,
+ *     isStale: false,
  *     position: 1
  *  },
  * ]
