@@ -13,7 +13,10 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
   if (!(Number.isInteger(max) && max > 0))
     throw new TypeError('`max` must be a positive integer');
 
-  if (typeof maxAge === 'number' && maxAge <= 0)
+  if (
+    (typeof maxAge !== 'undefined' && typeof maxAge !== 'number') ||
+    (typeof maxAge === 'number' && maxAge <= 0)
+  )
     throw new TypeError('`maxAge` must be a positive number');
 
   const Age = (() => {
@@ -169,7 +172,10 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       const keyMaxAge = options?.maxAge !== undefined ? options.maxAge : maxAge;
 
       if (keyMaxAge !== undefined) {
-        if (typeof keyMaxAge !== 'number' || keyMaxAge <= 0)
+        if (
+          (typeof maxAge !== 'undefined' && typeof maxAge !== 'number') ||
+          (typeof maxAge === 'number' && maxAge <= 0)
+        )
           throw new TypeError('`maxAge` must be a positive number');
 
         expList[index] = Age.now() + keyMaxAge;
@@ -249,6 +255,40 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
       for (let i = 0; i < size; i++) {
         yield [keyList[current]!, valList[current]!];
+        current = prev[current];
+      }
+    },
+
+    /** Iterates over the cache and retrieves debug information for a specific key or all keys. */
+    *debug(key?: Key): Generator<
+      | {
+          /** Item key. */
+          key: Key;
+          /** Item value. */
+          value: Value | undefined;
+          /** Time in milliseconds. */
+          maxAge: number;
+          /** Time in milliseconds. */
+          expiresAt: number;
+          /** When it's `true`, the next interaction with the key will evict it. */
+          isExpired: boolean;
+          /** From the most recent (`0`) to the oldest (`max`). */
+          position: number;
+        }
+      | undefined
+    > {
+      if (key !== undefined) {
+        const result = _debug(key);
+
+        if (result) yield result;
+
+        return;
+      }
+
+      let current = tail;
+
+      for (let i = 0; i < size; i++) {
+        yield _debug(keyList[current]!);
         current = prev[current];
       }
     },
@@ -376,39 +416,6 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       }
 
       max = newMax;
-    },
-
-    *debug(key?: Key): Generator<
-      | {
-          /** Item key. */
-          key: Key;
-          /** Item value. */
-          value: Value | undefined;
-          /** Time in milliseconds. */
-          maxAge: number;
-          /** Time in milliseconds. */
-          expiresAt: number;
-          /** When it's `true`, the next interaction with the key will evict it. */
-          isExpired: boolean;
-          /** From the most recent (`0`) to the oldest (`max`). */
-          position: number;
-        }
-      | undefined
-    > {
-      if (key !== undefined) {
-        const result = _debug(key);
-
-        if (result) yield result;
-
-        return;
-      }
-
-      let current = tail;
-
-      for (let i = 0; i < size; i++) {
-        yield _debug(keyList[current]!);
-        current = prev[current];
-      }
     },
 
     /** Returns the maximum number of items that can be stored in the cache. */
