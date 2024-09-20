@@ -6,9 +6,9 @@ export type CacheOptions<Key = unknown, Value = unknown> = {
    *
    * @default undefined
    */
-  stale?: number;
+  staleAt?: number;
   /**
-   * When `true` and `stale` is set, items remain stale based on their initial expiration.
+   * When `true` and `staleAt` is set, items remain staleAt based on their initial expiration.
    *
    * @default undefined
    */
@@ -22,16 +22,16 @@ export type CacheOptions<Key = unknown, Value = unknown> = {
 };
 
 export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
-  let { max, onEviction, stale, keepStale } = options;
+  let { max, onEviction, staleAt, keepStale } = options;
 
   if (!(Number.isInteger(max) && max > 0))
     throw new TypeError('`max` must be a positive integer');
 
   if (
-    (typeof stale !== 'undefined' && typeof stale !== 'number') ||
-    (typeof stale === 'number' && stale <= 0)
+    (typeof staleAt !== 'undefined' && typeof staleAt !== 'number') ||
+    (typeof staleAt === 'number' && staleAt <= 0)
   )
-    throw new TypeError('`stale` must be a positive number');
+    throw new TypeError('`staleAt` must be a positive number');
 
   const Age = (() => {
     try {
@@ -169,7 +169,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
   return {
     /** Adds a key-value pair to the cache. Updates the value if the key already exists. */
-    set(key: Key, value: Value, options?: { stale?: number }): undefined {
+    set(key: Key, value: Value, options?: { staleAt?: number }): undefined {
       if (key === undefined) return;
 
       let index = keyMap.get(key);
@@ -183,14 +183,15 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
       valList[index] = value;
 
-      const keyMaxAge = options?.stale !== undefined ? options.stale : stale;
+      const keyMaxAge =
+        options?.staleAt !== undefined ? options.staleAt : staleAt;
 
       if (keyMaxAge !== undefined) {
         if (
-          (typeof stale !== 'undefined' && typeof stale !== 'number') ||
-          (typeof stale === 'number' && stale <= 0)
+          (typeof staleAt !== 'undefined' && typeof staleAt !== 'number') ||
+          (typeof staleAt === 'number' && staleAt <= 0)
         )
-          throw new TypeError('`stale` must be a positive number');
+          throw new TypeError('`staleAt` must be a positive number');
 
         expList[index] = Age.now() + keyMaxAge;
         ageList[index] = keyMaxAge;

@@ -45,14 +45,14 @@ deno add npm:lru.min
 import { createLRU } from 'lru.min';
 
 const max = 2;
-const stale = 300000;
+const staleAt = 300000;
 const onEviction = (key, value) => {
   console.log(`Key "${key}" with value "${value}" has been evicted.`);
 };
 
 const LRU = createLRU({
   max,
-  stale,
+  staleAt,
   onEviction,
 });
 
