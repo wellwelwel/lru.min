@@ -364,9 +364,12 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       keyMap.clear();
       keyList.fill(undefined);
       valList.fill(undefined);
-      expList.fill(0);
-      ageList.fill(0);
-      staleList.fill(0);
+
+      if (staleAt !== undefined) {
+        expList.fill(0);
+        ageList.fill(0);
+        staleList.fill(0);
+      }
 
       free = [];
       size = 0;
