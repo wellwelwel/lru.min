@@ -190,8 +190,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
       valList[index] = value;
 
-      const keyMaxAge =
-        options?.staleAt !== undefined ? options.staleAt : staleAt;
+      const keyMaxAge = options?.staleAt ?? staleAt;
 
       if (keyMaxAge !== undefined) {
         if (typeof keyMaxAge !== 'number' || keyMaxAge <= 0)
@@ -364,12 +363,9 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       keyMap.clear();
       keyList.fill(undefined);
       valList.fill(undefined);
-
-      if (staleAt !== undefined) {
-        expList.fill(0);
-        ageList.fill(0);
-        staleList.fill(0);
-      }
+      expList.fill(0);
+      ageList.fill(0);
+      staleList.fill(0);
 
       free = [];
       size = 0;
