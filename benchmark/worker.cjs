@@ -31,7 +31,7 @@ const benchmarks = {
   },
   'lru.min': () => {
     let event = 0;
-    return createLRU({ max, maxAge: 1000, onEviction: () => event++ });
+    return createLRU({ max, staleAt: 1000, onEviction: () => event++ });
   },
 };
 
