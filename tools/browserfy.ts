@@ -5,7 +5,7 @@ import { minify } from 'terser';
 
 (async () => {
   const contents = (await readFile('src/index.ts', 'utf8')).replace(
-    /export const /gim,
+    /export const/gim,
     'window.'
   );
 

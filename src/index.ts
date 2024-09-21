@@ -1,15 +1,44 @@
+type Binary = 0 | 1;
+
 export type CacheOptions<Key = unknown, Value = unknown> = {
   /** Maximum number of items the cache can hold. */
   max: number;
-  /** Function called when an item is evicted from the cache. */
+  /**
+   * Maximum age (in ms) for items before they are considered stale.
+   *
+   * @default undefined
+   */
+  staleAt?: number;
+  /**
+   * When `true` and `staleAt` is set, items remain stale based on their initial expiration.
+   *
+   * @default undefined
+   */
+  keepStale?: boolean;
+  /**
+   * Function called when an item is evicted from the cache.
+   *
+   * @default undefined
+   */
   onEviction?: (key: Key, value: Value) => unknown;
 };
 
 export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
-  let { max, onEviction } = options;
+  let { max, onEviction, staleAt, keepStale } = options;
 
   if (!(Number.isInteger(max) && max > 0))
     throw new TypeError('`max` must be a positive integer');
+
+  if (staleAt !== undefined && (typeof staleAt !== 'number' || staleAt <= 0))
+    throw new TypeError('`staleAt` must be a positive number');
+
+  const Age = (() => {
+    try {
+      return typeof performance.now === 'function' ? performance : Date;
+    } catch {
+      return Date;
+    }
+  })();
 
   let size = 0;
   let head = 0;
@@ -19,6 +48,9 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
   const keyMap: Map<Key, number> = new Map();
   const keyList: (Key | undefined)[] = new Array(max).fill(undefined);
   const valList: (Value | undefined)[] = new Array(max).fill(undefined);
+  const expList: number[] = new Array(max).fill(0);
+  const ageList: number[] = new Array(max).fill(0);
+  const staleList: Binary[] = new Array(max).fill(0);
   const next: number[] = new Array(max).fill(0);
   const prev: number[] = new Array(max).fill(0);
 
@@ -48,6 +80,9 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
     keyList[evictHead] = undefined;
     valList[evictHead] = undefined;
+    expList[evictHead] = 0;
+    ageList[evictHead] = 0;
+    staleList[evictHead] = 0;
     head = next[evictHead];
 
     if (head !== 0) prev[head] = 0;
@@ -61,9 +96,87 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
     return evictHead;
   };
 
+  const _delete = (key: Key): boolean => {
+    const index = keyMap.get(key);
+
+    if (index === undefined) return false;
+
+    onEviction?.(key, valList[index]!);
+    keyMap.delete(key);
+    free.push(index);
+
+    keyList[index] = undefined;
+    valList[index] = undefined;
+    expList[index] = 0;
+    ageList[index] = 0;
+    staleList[index] = 0;
+
+    const prevIndex = prev[index];
+    const nextIndex = next[index];
+
+    if (prevIndex !== 0) next[prevIndex] = nextIndex;
+    if (nextIndex !== 0) prev[nextIndex] = prevIndex;
+
+    if (index === head) head = nextIndex;
+    if (index === tail) tail = prevIndex;
+
+    size--;
+
+    return true;
+  };
+
+  const _checkAge = (key: Key): boolean => {
+    const index = keyMap.get(key);
+
+    if (index !== undefined) {
+      const expiresAt = expList[index];
+
+      if (expiresAt !== 0 && Age.now() > expiresAt) {
+        _delete(key);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const _debug = (key: Key) => {
+    const index = keyMap.get(key);
+
+    if (index === undefined) return;
+
+    const ageItem = ageList[index];
+    const expiresAt = expList[index];
+    const now = Age.now();
+    const timeRemaining = expiresAt !== 0 ? expiresAt - now : 0;
+    const isStale = expiresAt !== 0 && now > expiresAt;
+
+    let current = tail;
+    let position = 0;
+
+    while (current !== index && current !== 0) {
+      current = prev[current];
+      position++;
+    }
+
+    return {
+      key,
+      value: valList[index],
+      maxAge: ageItem,
+      staleAt: timeRemaining > 0 ? timeRemaining : 0,
+      isStale,
+      keepStale: Boolean(staleList[index]),
+      position,
+    };
+  };
+
   return {
     /** Adds a key-value pair to the cache. Updates the value if the key already exists. */
-    set(key: Key, value: Value): undefined {
+    set(
+      key: Key,
+      value: Value,
+      options?: { staleAt?: number; keepStale?: boolean }
+    ): undefined {
       if (key === undefined) return;
 
       let index = keyMap.get(key);
@@ -77,6 +190,24 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
       valList[index] = value;
 
+      const keyMaxAge = options?.staleAt ?? staleAt;
+
+      if (keyMaxAge !== undefined) {
+        if (typeof keyMaxAge !== 'number' || keyMaxAge <= 0)
+          throw new TypeError('`staleAt` must be a positive number');
+
+        expList[index] = Age.now() + keyMaxAge;
+        ageList[index] = keyMaxAge;
+      } else {
+        expList[index] = 0;
+        ageList[index] = 0;
+      }
+
+      staleList[index] =
+        options?.keepStale !== undefined
+          ? (Number(options.keepStale) as Binary)
+          : (Number(keepStale === true) as Binary);
+
       if (size === 1) head = tail = index;
       else setTail(index, 'set');
     },
@@ -86,7 +217,15 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       const index = keyMap.get(key);
 
       if (index === undefined) return;
+      if (!_checkAge(key)) return;
+
       if (index !== tail) setTail(index, 'get');
+
+      if (staleList[index] === 0) {
+        const itemMaxAge = ageList[index];
+
+        if (itemMaxAge !== 0) expList[index] = Age.now() + itemMaxAge;
+      }
 
       return valList[index];
     },
@@ -95,11 +234,25 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
     peek: (key: Key): Value | undefined => {
       const index = keyMap.get(key);
 
+      if (!_checkAge(key)) return;
       return index !== undefined ? valList[index] : undefined;
     },
 
     /** Checks if a key exists in the cache. */
-    has: (key: Key): boolean => keyMap.has(key),
+    has: (key: Key): boolean => {
+      const index = keyMap.get(key);
+
+      if (index === undefined) return false;
+      if (!_checkAge(key)) return false;
+
+      if (staleList[index] === 0) {
+        const itemMaxAge = ageList[index];
+
+        if (itemMaxAge !== 0) expList[index] = Age.now() + itemMaxAge;
+      }
+
+      return true;
+    },
 
     /** Iterates over all keys in the cache, from most recent to least recent. */
     *keys(): IterableIterator<Key> {
@@ -131,6 +284,42 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       }
     },
 
+    /** Iterates over the cache and retrieves debug information for a specific key or all keys. */
+    *debug(key?: Key): Generator<
+      | {
+          /** Item key. */
+          key: Key;
+          /** Item value. */
+          value: Value | undefined;
+          /** Time in milliseconds. */
+          maxAge: number;
+          /** Time in milliseconds. */
+          staleAt: number;
+          /** When `true`, the next interaction with the key will evict it. */
+          isStale: boolean;
+          /** Whether the item keeps its stale time upon access. */
+          keepStale: boolean;
+          /** From the most recent (`0`) to the oldest (`max`). */
+          position: number;
+        }
+      | undefined
+    > {
+      if (key !== undefined) {
+        const result = _debug(key);
+
+        if (result) yield result;
+
+        return;
+      }
+
+      let current = tail;
+
+      for (let i = 0; i < size; i++) {
+        yield _debug(keyList[current]!);
+        current = prev[current];
+      }
+    },
+
     /** Iterates over each value-key pair in the cache, from most recent to least recent. */
     forEach: (callback: (value: Value, key: Key) => unknown): undefined => {
       let current = tail;
@@ -146,31 +335,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
     },
 
     /** Deletes a key-value pair from the cache. */
-    delete(key: Key): boolean {
-      const index = keyMap.get(key);
-
-      if (index === undefined) return false;
-
-      onEviction?.(key, valList[index]!);
-      keyMap.delete(key);
-      free.push(index);
-
-      keyList[index] = undefined;
-      valList[index] = undefined;
-
-      const prevIndex = prev[index];
-      const nextIndex = next[index];
-
-      if (prevIndex !== 0) next[prevIndex] = nextIndex;
-      if (nextIndex !== 0) prev[nextIndex] = prevIndex;
-
-      if (index === head) head = nextIndex;
-      if (index === tail) tail = prevIndex;
-
-      size--;
-
-      return true;
-    },
+    delete: _delete,
 
     /** Evicts the oldest item or the specified number of the oldest items from the cache. */
     evict: (number: number): undefined => {
@@ -198,6 +363,9 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       keyMap.clear();
       keyList.fill(undefined);
       valList.fill(undefined);
+      expList.fill(0);
+      ageList.fill(0);
+      staleList.fill(0);
 
       free = [];
       size = 0;
@@ -216,10 +384,17 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
         const preserve = Math.min(size, newMax);
         const remove = size - preserve;
-        const newKeyList: (Key | undefined)[] = new Array(newMax);
-        const newValList: (Value | undefined)[] = new Array(newMax);
-        const newNext: number[] = new Array(newMax);
-        const newPrev: number[] = new Array(newMax);
+        const newKeyList: (Key | undefined)[] = new Array(newMax).fill(
+          undefined
+        );
+        const newValList: (Value | undefined)[] = new Array(newMax).fill(
+          undefined
+        );
+        const newExpList: number[] = new Array(newMax).fill(0);
+        const newAgeList: number[] = new Array(newMax).fill(0);
+        const newStaleList: Binary[] = new Array(newMax).fill(0);
+        const newNext: number[] = new Array(newMax).fill(0);
+        const newPrev: number[] = new Array(newMax).fill(0);
 
         for (let i = 1; i <= remove; i++)
           onEviction?.(keyList[i]!, valList[i]!);
@@ -227,6 +402,9 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
         for (let i = preserve - 1; i >= 0; i--) {
           newKeyList[i] = keyList[current];
           newValList[i] = valList[current];
+          newExpList[i] = expList[current];
+          newAgeList[i] = ageList[current];
+          newStaleList[i] = staleList[current];
           newNext[i] = i + 1;
           newPrev[i] = i - 1;
           keyMap.set(newKeyList[i]!, i);
@@ -239,12 +417,18 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
         keyList.length = newMax;
         valList.length = newMax;
+        expList.length = newMax;
+        ageList.length = newMax;
+        staleList.length = newMax;
         next.length = newMax;
         prev.length = newMax;
 
         for (let i = 0; i < preserve; i++) {
           keyList[i] = newKeyList[i];
           valList[i] = newValList[i];
+          expList[i] = newExpList[i];
+          ageList[i] = newAgeList[i];
+          staleList[i] = newStaleList[i];
           next[i] = newNext[i];
           prev[i] = newPrev[i];
         }
@@ -257,6 +441,9 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
         keyList.push(...new Array(fill).fill(undefined));
         valList.push(...new Array(fill).fill(undefined));
+        expList.push(...new Array(fill).fill(0));
+        ageList.push(...new Array(fill).fill(0));
+        staleList.push(...new Array(fill).fill(0));
         next.push(...new Array(fill).fill(0));
         prev.push(...new Array(fill).fill(0));
       }

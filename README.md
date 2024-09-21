@@ -8,7 +8,7 @@
 [![GitHub Workflow Status (Bun)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_bun.yml?event=push&label=&branch=main&logo=bun&logoColor=ffffff&color=f368e0)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_bun.yml?query=branch%3Amain)
 [![GitHub Workflow Status (Deno)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_deno.yml?event=push&label=&branch=main&logo=deno&logoColor=ffffff&color=079992)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_deno.yml?query=branch%3Amain)
 
-🔥 An extremely fast and efficient <strong><a href="https://en.m.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29">LRU</a> Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **6.8KB**.
+🔥 An extremely fast and efficient <strong><a href="https://en.m.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29">LRU</a> Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **9.0KB**.
 
 </div>
 
@@ -44,13 +44,13 @@ deno add npm:lru.min
 ```js
 import { createLRU } from 'lru.min';
 
-const max = 2;
 const onEviction = (key, value) => {
   console.log(`Key "${key}" with value "${value}" has been evicted.`);
 };
 
 const LRU = createLRU({
-  max,
+  max: 2,
+  staleAt: 300000,
   onEviction,
 });
 
@@ -72,7 +72,9 @@ LRU.clear(); // LRU.evict(max)
 
 // => Key "C" with value "Another Value" has been evicted.
 
-LRU.set('D', "You're amazing 💛");
+LRU.set('D', "You're amazing 💛", {
+  staleAt: Number.POSITIVE_INFINITY,
+});
 
 LRU.size; // 1
 LRU.max; // 2
@@ -83,6 +85,30 @@ LRU.resize(10);
 LRU.size; // 1
 LRU.max; // 10
 LRU.available; // 9
+
+LRU.set('E', 'Yet Another Value');
+
+[...LRU.debug()];
+/**
+ * [
+ *  {
+ *     key: 'E',
+ *     value: 'Yet Another Value',
+ *     maxAge: 300000,
+ *     staleAt: 299999.90000000596,
+ *     isStale: false,
+ *     position: 0
+ *  },
+ *  {
+ *     key: 'D',
+ *     value: "You're amazing 💛",
+ *     maxAge: Infinity,
+ *     staleAt: Infinity,
+ *     isStale: false,
+ *     position: 1
+ *  },
+ * ]
+ */
 ```
 
 > For _up-to-date_ documentation, always follow the [**README.md**](https://github.com/wellwelwel/lru.min?tab=readme-ov-file#readme) in the **GitHub** repository.
@@ -340,7 +366,7 @@ See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main
 
 **lru.min** is based and inspired on the architecture and code of both [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
 
-For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
+For more comprehensive features, consider using and supporting them 🤝
 
 - The architecture is mostly based on [@isaacs](https://github.com/isaacs) — [**lru-cache**](https://github.com/isaacs/node-lru-cache/blob/8f51d75351cbb4ac819952eb8e9f95eda00ef800/src/index.ts).
 - Most of the methods names and its functionalities were inspired by [@sindresorhus](https://github.com/sindresorhus) — [**quick-lru**](https://github.com/sindresorhus/quick-lru/blob/a2262c65e1952539cb4d985a67c46363a780d234/index.js).
