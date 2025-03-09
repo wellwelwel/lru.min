@@ -8,7 +8,7 @@
 [![GitHub Workflow Status (Bun)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_bun.yml?event=push&label=&branch=main&logo=bun&logoColor=ffffff&color=f368e0)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_bun.yml?query=branch%3Amain)
 [![GitHub Workflow Status (Deno)](https://img.shields.io/github/actions/workflow/status/wellwelwel/lru.min/ci_deno.yml?event=push&label=&branch=main&logo=deno&logoColor=ffffff&color=079992)](https://github.com/wellwelwel/lru.min/actions/workflows/ci_deno.yml?query=branch%3Amain)
 
-🔥 An extremely fast and efficient <strong><a href="https://en.m.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29">LRU</a> Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible) — **6.8KB**.
+🔥 An extremely fast, efficient, and lightweight <strong><a href="https://en.m.wikipedia.org/wiki/Cache_replacement_policies#Least_Recently_Used_.28LRU.29">LRU</a> Cache</strong> for <strong>JavaScript</strong> (<strong>Browser</strong> compatible).
 
 </div>
 
@@ -68,7 +68,7 @@ LRU.delete('B');
 
 LRU.peek('C');
 
-LRU.clear(); // LRU.evict(max)
+LRU.clear(); // ← recommended | LRU.evict(max) → (slower alternative)
 
 // => Key "C" with value "Another Value" has been evicted.
 
@@ -140,6 +140,8 @@ LRU.set('key', 'value');
 
 > `undefined` keys will simply be ignored.
 
+- Complexity: **O(1)**.
+
 ### Get a cache
 
 Retrieves the value for a given key and moves the key to the most recent position.
@@ -147,6 +149,8 @@ Retrieves the value for a given key and moves the key to the most recent positio
 ```ts
 LRU.get('key');
 ```
+
+- Complexity: **O(1)**.
 
 ### Peek a cache
 
@@ -156,17 +160,23 @@ Retrieves the value for a given key without changing its position.
 LRU.peek('key');
 ```
 
+- Complexity: **O(1)**.
+
 ### Check if a key exists
 
 ```ts
 LRU.has('key');
 ```
 
+- Complexity: **O(1)**.
+
 ### Delete a cache
 
 ```ts
 LRU.delete('key');
 ```
+
+- Complexity: **O(1)**.
 
 ### Evict from the oldest cache
 
@@ -175,6 +185,8 @@ Evicts the specified number of the oldest items from the cache.
 ```ts
 LRU.evict(1000);
 ```
+
+- Complexity: **O(key)** — even if passed a number greater than the number of items, only existing items will be evicted.
 
 > [!TIP]
 >
@@ -189,6 +201,10 @@ Resizes the cache to a new maximum size, evicting items if necessary.
 LRU.resize(50_000);
 ```
 
+- Complexity:
+  - Increasing: **O(newMax - max)**.
+  - Downsizing: **O(n)**.
+
 ### Clear the cache
 
 Clears and disposes (if used) all key-value pairs from the cache.
@@ -196,6 +212,8 @@ Clears and disposes (if used) all key-value pairs from the cache.
 ```ts
 LRU.clear();
 ```
+
+- Complexity: **O(keys)**.
 
 ### Debugging
 
@@ -205,17 +223,23 @@ LRU.clear();
 LRU.max;
 ```
 
+- Complexity: **O(1)**.
+
 #### Get the current size of the cache
 
 ```ts
 LRU.size;
 ```
 
+- Complexity: **O(1)**.
+
 #### Get the available slots in the cache
 
 ```ts
 LRU.available;
 ```
+
+- Complexity: **O(1)**.
 
 ### Iterating the cache
 
@@ -227,6 +251,8 @@ Iterates over all keys in the cache, from most recent to least recent.
 const keys = [...LRU.keys()];
 ```
 
+- Complexity: **O(keys)**.
+
 #### Get all values
 
 Iterates over all values in the cache, from most recent to least recent.
@@ -235,6 +261,8 @@ Iterates over all values in the cache, from most recent to least recent.
 const values = [...LRU.values()];
 ```
 
+- Complexity: **O(values)**.
+
 #### Get all entries
 
 Iterates over `[key, value]` pairs in the cache, from most recent to least recent.
@@ -242,6 +270,8 @@ Iterates over `[key, value]` pairs in the cache, from most recent to least recen
 ```ts
 const entries = [...LRU.entries()];
 ```
+
+- Complexity: **O(entries)**.
 
 #### Run a callback for each entry
 
@@ -252,6 +282,8 @@ LRU.forEach((value, key) => {
   // do something
 });
 ```
+
+- Complexity: **O(entries)**.
 
 ### TypeScript
 
