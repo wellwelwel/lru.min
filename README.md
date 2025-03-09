@@ -213,7 +213,9 @@ Clears and disposes (if used) all key-value pairs from the cache.
 LRU.clear();
 ```
 
-- Complexity: **O(keys)**.
+- Complexity:
+  - Without `onEviction`: **O(1)**.
+  - Using `onEviction`: **O(entries)**.
 
 ### Debugging
 
@@ -284,6 +286,14 @@ LRU.forEach((value, key) => {
 ```
 
 - Complexity: **O(entries)**.
+
+---
+
+> [!NOTE]
+>
+> - We use `O(keys)`, `O(values)`, `O(entries)`, and `O(newMax - max)` to explicitly indicate what is being iterated over. In traditional complexity notation, this would be represented as `O(n)`.
+
+---
 
 ### TypeScript
 
