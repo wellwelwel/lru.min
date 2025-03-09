@@ -51,7 +51,7 @@
     "@types/babel__core": "^7.20.5",
     "@types/node": "^22.13.10",
     "esbuild": "^0.25.0",
-    "monocart-coverage-reports": "^2.12.2",
+    "monocart-coverage-reports": "2.12.1",
     "packages-update": "^2.0.0",
     "poku": "^2.7.1",
     "prettier": "^3.5.3",
