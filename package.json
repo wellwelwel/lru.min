@@ -45,19 +45,19 @@
     "size": "ls -lh lib/index.mjs | awk '{print $5}'"
   },
   "devDependencies": {
-    "@babel/core": "^7.25.2",
-    "@babel/preset-env": "^7.25.4",
-    "@biomejs/biome": "^1.9.2",
+    "@babel/core": "^7.26.9",
+    "@babel/preset-env": "^7.26.9",
+    "@biomejs/biome": "^1.9.4",
     "@types/babel__core": "^7.20.5",
-    "@types/node": "^22.5.5",
+    "@types/node": "^22.13.10",
     "esbuild": "^0.25.0",
-    "monocart-coverage-reports": "^2.10.9",
+    "monocart-coverage-reports": "^2.12.2",
     "packages-update": "^2.0.0",
-    "poku": "^2.7.0",
-    "prettier": "^3.3.3",
-    "terser": "^5.33.0",
-    "tsx": "^4.19.1",
-    "typescript": "^5.6.2"
+    "poku": "^2.7.1",
+    "prettier": "^3.5.3",
+    "terser": "^5.39.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2"
   },
   "exports": {
     ".": {

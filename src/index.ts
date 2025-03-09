@@ -6,7 +6,7 @@ export type CacheOptions<Key = unknown, Value = unknown> = {
 };
 
 export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
-  let { max, onEviction } = options;
+  let { max } = options;
 
   if (!(Number.isInteger(max) && max > 0))
     throw new TypeError('`max` must be a positive integer');
@@ -16,6 +16,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
   let tail = 0;
   let free: number[] = [];
 
+  const { onEviction } = options;
   const keyMap: Map<Key, number> = new Map();
   const keyList: (Key | undefined)[] = new Array(max).fill(undefined);
   const valList: (Value | undefined)[] = new Array(max).fill(undefined);
