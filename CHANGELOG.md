@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.2](https://github.com/wellwelwel/lru.min/compare/v1.1.1...v1.1.2) (2025-03-09)
+
+
+### Performance Improvements
+
+* improve variable declaration types and its order ([#49](https://github.com/wellwelwel/lru.min/issues/49)) ([4e2ec1c](https://github.com/wellwelwel/lru.min/commit/4e2ec1c9b22b71ed8c356b003a70de96cf8a4e11))
+
 ## [1.1.1](https://github.com/wellwelwel/lru.min/compare/v1.1.0...v1.1.1) (2024-09-20)
 
 
