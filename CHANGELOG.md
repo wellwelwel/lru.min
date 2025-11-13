@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.3](https://github.com/wellwelwel/lru.min/compare/v1.1.2...v1.1.3) (2025-11-13)
+
+
+### Performance Improvements
+
+* minimize clear method overhead using linked list traversal ([#55](https://github.com/wellwelwel/lru.min/issues/55)) ([76e52cc](https://github.com/wellwelwel/lru.min/commit/76e52ccd75073b8f1514f19c7bd695562cb0641f))
+
 ## [1.1.2](https://github.com/wellwelwel/lru.min/compare/v1.1.1...v1.1.2) (2025-03-09)
 
 
