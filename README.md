@@ -346,7 +346,6 @@ LRU.set(2, { name: 'Mary' });
 The benchmark is performed by comparing `1,000,000` runs through a maximum cache limit of `100,000`, getting `333,333` caches and deleting `200,000` keys 10 consecutive times, clearing the cache every run.
 
 > - [**lru-cache**](https://github.com/isaacs/node-lru-cache) `v11.0.0`
-> - [**quick-lru**](https://github.com/sindresorhus/quick-lru) `v7.0.0`
 
 ```sh
 # Time:
@@ -378,43 +377,12 @@ See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main
 
 ## Acknowledgements
 
-**lru.min** is based and inspired on the architecture and code of both [**lru-cache**](https://github.com/isaacs/node-lru-cache) and [**quick-lru**](https://github.com/sindresorhus/quick-lru), simplifying their core concepts for enhanced performance and compatibility.
-
-For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
-
-- The architecture is mostly based on [@isaacs](https://github.com/isaacs) — [**lru-cache**](https://github.com/isaacs/node-lru-cache/blob/8f51d75351cbb4ac819952eb8e9f95eda00ef800/src/index.ts).
-- Most of the methods names and its functionalities were inspired by [@sindresorhus](https://github.com/sindresorhus) — [**quick-lru**](https://github.com/sindresorhus/quick-lru/blob/a2262c65e1952539cb4d985a67c46363a780d234/index.js).
 - [![Contributors](https://img.shields.io/github/contributors/wellwelwel/lru.min?label=Contributors)](https://github.com/wellwelwel/lru.min/graphs/contributors)
+- **lru.min** is inspired by [**lru-cache**](https://github.com/isaacs/node-lru-cache) architecture and [**quick-lru**](https://github.com/sindresorhus/quick-lru) usage, simplifying and improving their concepts for enhanced performance and compatibility.
 
----
-
-#### What comes from [**lru-cache**](https://github.com/isaacs/node-lru-cache)?
-
-Architecture's essence:
-
-> _It's not the same code, but majority based on [this](https://github.com/isaacs/node-lru-cache/blob/8f51d75351cbb4ac819952eb8e9f95eda00ef800/src/index.ts#L1385-L1394)._
-
-```ts
-let free: number[] = [];
-
-const keyMap: Map<Key, number> = new Map();
-const keyList: (Key | undefined)[] = new Array(max).fill(undefined);
-const valList: (Value | undefined)[] = new Array(max).fill(undefined);
-const next: number[] = new Array(max).fill(0);
-const prev: number[] = new Array(max).fill(0);
-```
-
----
-
-#### What comes from [**quick-lru**](https://github.com/sindresorhus/quick-lru)?
-
-Name of methods and options _(including their final functionality ideas)_:
-
-- `resize`
-- `peek`
-- `onEviction`
-- `forEach`
-- `entriesDescending` as `entries`
+> [!IMPORTANT]
+>
+> No [**lru-cache**](https://github.com/isaacs/node-lru-cache) or [**quick-lru**](https://github.com/sindresorhus/quick-lru) code is used in **lru.min**. For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
 
 ---
 
