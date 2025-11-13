@@ -352,12 +352,10 @@ The benchmark is performed by comparing `1,000,000` runs through a maximum cache
 # Time:
   lru.min:    240.45ms
   lru-cache:  258.32ms
-  quick-lru:  279.89ms
 
 # CPU:
   lru.min:    275558.30µs
   lru-cache:  306858.30µs
-  quick-lru:  401318.80µs
 ```
 
 - See detailed results and how the tests are run and compared in the [**benchmark**](https://github.com/wellwelwel/lru.min/tree/main/benchmark) directory.
