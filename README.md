@@ -379,11 +379,10 @@ See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main
 
 - [![Contributors](https://img.shields.io/github/contributors/wellwelwel/lru.min?label=Contributors)](https://github.com/wellwelwel/lru.min/graphs/contributors)
 - **lru.min** is inspired by [**lru-cache**](https://github.com/isaacs/node-lru-cache) architecture and [**quick-lru**](https://github.com/sindresorhus/quick-lru) usage, simplifying and improving their concepts for enhanced performance and compatibility.
-  - For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
 
 > [!IMPORTANT]
 >
-> No [**lru-cache**](https://github.com/isaacs/node-lru-cache) or [**quick-lru**](https://github.com/sindresorhus/quick-lru) code is used in **lru.min**.
+> No [**lru-cache**](https://github.com/isaacs/node-lru-cache) or [**quick-lru**](https://github.com/sindresorhus/quick-lru) code is used in **lru.min**. For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
 
 ---
 
