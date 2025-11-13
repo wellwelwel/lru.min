@@ -1,6 +1,5 @@
 {
   "dependencies": {
-    "lru-cache": "^11.0.0",
-    "quick-lru": "^7.0.0"
+    "lru-cache": "^11.2.2"
   }
 }

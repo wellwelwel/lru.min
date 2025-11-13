@@ -1,7 +1,7 @@
 import process from 'node:process';
 import { fork } from 'node:child_process';
 
-const benchmarks = ['lru-cache', 'quick-lru', 'lru.min'];
+const benchmarks = ['lru-cache', 'lru.min'];
 const results = new Map();
 
 const runBenchmark = (benchmarkName) => {

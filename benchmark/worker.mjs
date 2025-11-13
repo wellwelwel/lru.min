@@ -1,7 +1,6 @@
 import process from 'node:process';
 import { performance } from 'node:perf_hooks';
 import { LRUCache } from 'lru-cache';
-import QuickLRU from 'quick-lru';
 import { createLRU } from '../lib/index.mjs';
 
 const benchmarkName = process.argv[2];
@@ -27,7 +26,6 @@ const brute = 1000000;
 
 const benchmarks = {
   'lru-cache': () => new LRUCache({ max }),
-  'quick-lru': () => new QuickLRU({ maxSize: max }),
   'lru.min': () => createLRU({ max }),
 };
 
