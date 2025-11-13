@@ -1,5 +1,6 @@
 node_modules
 .DS_Store
+t.ts
 /deno.lock
 /lib
 /browser
