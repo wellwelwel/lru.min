@@ -34,12 +34,10 @@ const runBenchmark = (benchmarkName) => {
   console.log('Time:');
   for (const [name, result] of sortedByTime)
     console.log(`  ${name}: ${result.time.toFixed(2)}ms`);
-  console.log('  quick-lru: not compatible');
 
   console.log('\nCPU:');
   for (const [name, result] of sortedByCpu)
     console.log(`  ${name}: ${result.cpu.toFixed(2)}µs`);
-  console.log('  quick-lru: not compatible');
 
   if (sortedByTime[0][0] !== 'lru.min' || sortedByCpu[0][0] !== 'lru.min')
     process.exit(1);
