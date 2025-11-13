@@ -383,7 +383,7 @@ See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main
 
 > [!IMPORTANT]
 >
-> No code from [**lru-cache**](https://github.com/isaacs/node-lru-cache) or [**quick-lru**](https://github.com/sindresorhus/quick-lru) is used in **lru.min**.
+> No [**lru-cache**](https://github.com/isaacs/node-lru-cache) or [**quick-lru**](https://github.com/sindresorhus/quick-lru) code is used in **lru.min**.
 
 ---
 
