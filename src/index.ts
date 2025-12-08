@@ -195,11 +195,9 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
       for (let i = 0; i < size; i++) {
         const key = keyList[current]!;
-        if (timestamps && _isStale(current)) {
-          expiredKeys.push(key);
-        } else {
-          yield key;
-        }
+        if (timestamps && _isStale(current)) expiredKeys.push(key);
+        else yield key;
+
         current = prev[current];
       }
 
@@ -216,11 +214,9 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
       for (let i = 0; i < size; i++) {
         const key = keyList[current]!;
-        if (timestamps && _isStale(current)) {
-          expiredKeys.push(key);
-        } else {
-          yield valList[current]!;
-        }
+        if (timestamps && _isStale(current)) expiredKeys.push(key);
+        else yield valList[current]!;
+
         current = prev[current];
       }
 
@@ -237,11 +233,9 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
       for (let i = 0; i < size; i++) {
         const key = keyList[current]!;
-        if (timestamps && _isStale(current)) {
-          expiredKeys.push(key);
-        } else {
-          yield [key, valList[current]!];
-        }
+        if (timestamps && _isStale(current)) expiredKeys.push(key);
+        else yield [key, valList[current]!];
+
         current = prev[current];
       }
 
@@ -258,12 +252,12 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
       for (let i = 0; i < size; i++) {
         const key = keyList[current]!;
-        if (timestamps && _isStale(current)) {
-          expiredKeys.push(key);
-        } else {
+        if (timestamps && _isStale(current)) expiredKeys.push(key);
+        else {
           const value = valList[current]!;
           callback(value, key);
         }
+
         current = prev[current];
       }
 

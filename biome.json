@@ -1,87 +1,53 @@
 {
-  "$schema": "https://biomejs.dev/schemas/1.9.4/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.8/schema.json",
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "off"
+      }
+    }
+  },
   "files": {
-    "include": ["**/**"],
-    "ignore": [
-      "node_modules",
-      "lib",
-      "browser",
-      "benchmark",
-      "coverage-reports"
-    ]
+    "includes": [
+      "**",
+      "!!node_modules",
+      "!!browser",
+      "!!coverage-reports",
+      "!!playground",
+      "!!t.ts"
+    ],
+    "ignoreUnknown": true
   },
   "linter": {
     "enabled": true,
     "rules": {
-      "all": true,
+      "recommended": true,
       "complexity": {
-        "all": true,
-        "noExcessiveCognitiveComplexity": "off"
+        "recommended": true
       },
       "a11y": {
-        "all": true
+        "recommended": true
       },
       "correctness": {
-        "all": true,
-        "noNodejsModules": "off",
-        "useImportExtensions": "error"
+        "recommended": true
       },
       "nursery": {
-        "all": true,
-        "useImportRestrictions": "off",
-        "noSecrets": "off",
-        "useExplicitType": "off",
-        "noNestedTernary": "off"
+        "recommended": true
       },
       "performance": {
-        "all": true,
-        "noAccumulatingSpread": "error",
-        "noBarrelFile": "error",
-        "noDelete": "error",
-        "noReExportAll": "error"
+        "recommended": true
       },
       "security": {
-        "all": true
+        "recommended": true
       },
       "suspicious": {
-        "all": true,
-        "noConsoleLog": "off",
-        "noEmptyBlockStatements": "off",
-        "noConsole": "off"
+        "recommended": true,
+        "noNonNullAssertedOptionalChain": "off"
       },
       "style": {
-        "all": true,
-        "useNamingConvention": "off",
-        "noNamespaceImport": "off",
-        "noDefaultExport": "error",
-        "useBlockStatements": "off",
+        "recommended": true,
         "noNonNullAssertion": "off"
       }
     }
-  },
-  "overrides": [
-    {
-      "include": ["test", "tools"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noNodejsModules": "off"
-          },
-          "performance": {
-            "useTopLevelRegex": "off"
-          }
-        }
-      }
-    },
-    {
-      "include": ["mcr.config.ts"],
-      "linter": {
-        "rules": {
-          "style": {
-            "noDefaultExport": "off"
-          }
-        }
-      }
-    }
-  ]
+  }
 }

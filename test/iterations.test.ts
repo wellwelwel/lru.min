@@ -55,7 +55,9 @@ describe('Iterations Suite', () => {
     LRU.set('key:🐷:3', 'value3');
     LRU.set('key:🐷:4', 'value4');
 
-    LRU.forEach((value, key) => iterations.push([value, key]));
+    LRU.forEach((value, key) => {
+      iterations.push([value, key]);
+    });
 
     assert.deepStrictEqual(iterations, [
       ['value4', 'key:🐷:4'],
