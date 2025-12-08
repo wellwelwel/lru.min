@@ -329,7 +329,7 @@ Retrieves debug information for a specific key or all keys in the cache.
 
 > [!NOTE]
 >
-> - We use `O(keys)`, `O(values)`, `O(entries)`, and `O(newMax - max)` to explicitly indicate what is being iterated over. In traditional complexity notation, this would be represented as `O(n)`.
+> - `O(keys)`, `O(values)`, `O(entries)`, and `O(newMax - max)` are used to explicitly indicate what is being iterated over. In traditional complexity notation, this would be represented as `O(n)`.
 
 ---
 
