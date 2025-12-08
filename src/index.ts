@@ -77,7 +77,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
     return evictHead;
   };
 
-  const _deleteByIndex = (index: number, key: Key): void => {
+  const _deleteByIndex = (index: number, key: Key): undefined => {
     onEviction?.(key, valList[index]!);
     keyMap.delete(key);
     free.push(index);
