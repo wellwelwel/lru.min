@@ -45,14 +45,12 @@ deno add npm:lru.min
 import { createLRU } from 'lru.min';
 
 const max = 2;
+const maxAge = 300000;
 const onEviction = (key, value) => {
   console.log(`Key "${key}" with value "${value}" has been evicted.`);
 };
 
-const LRU = createLRU({
-  max,
-  onEviction,
-});
+const LRU = createLRU({ max, maxAge, onEviction });
 
 LRU.set('A', 'My Value');
 LRU.set('B', 'Other Value');
@@ -119,7 +117,7 @@ const { createLRU } = require('lru.min');
 const LRU = createLRU({ max: 150_000 });
 ```
 
-Also, you can set a callback for every deletion/eviction:
+You can set a callback for every deletion/eviction:
 
 ```ts
 const LRU = createLRU({
@@ -129,6 +127,25 @@ const LRU = createLRU({
   },
 });
 ```
+
+You can also set a max age to stale a cache:
+
+```ts
+const LRU = createLRU({
+  max: 150_000,
+  maxAge: 1_800_000,
+});
+```
+
+When `maxAge` is set, expired items are automatically removed when detected:
+
+- **`get`**: Refreshes the max age on access (sliding expiration) and removes if expired.
+- **`has`**, **`peek`**: Validates and removes if expired without refreshing the timestamp.
+- **`keys`**, **`values`**, **`entries`**, **`forEach`**: Filter out expired items and remove them after iteration completes.
+
+> [!NOTE]
+>
+> All expired items trigger the `onEviction` callback when removed.
 
 ### Set a cache
 
@@ -287,6 +304,27 @@ LRU.forEach((value, key) => {
 
 - Complexity: **O(entries)**.
 
+#### Dump cache information
+
+Retrieves debug information for a specific key or all keys in the cache.
+
+```ts
+[...LRU.dump()]; // [...LRU.dump('D')];
+/**
+ * [
+ *  {
+ *    isStale: false,
+ *    key: 'D',
+ *    position: 0,
+ *    staleAt: 498836.30000000447, // "never"
+ *    value: "You're amazing 💛",
+ *  },
+ * ]
+ */
+```
+
+- Complexity: **O(entries)**.
+
 ---
 
 > [!NOTE]
@@ -382,7 +420,7 @@ See the [**Contributing Guide**](https://github.com/wellwelwel/lru.min/blob/main
 
 > [!IMPORTANT]
 >
-> No [**lru-cache**](https://github.com/isaacs/node-lru-cache) or [**quick-lru**](https://github.com/sindresorhus/quick-lru) code is used in **lru.min**. For more comprehensive features such as **TTL** support, consider using and supporting them 🤝
+> No [**lru-cache**](https://github.com/isaacs/node-lru-cache) or [**quick-lru**](https://github.com/sindresorhus/quick-lru) code is used in **lru.min**.
 
 ---
 
