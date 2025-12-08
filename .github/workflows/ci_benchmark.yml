@@ -41,8 +41,5 @@ jobs:
       - name: 📦 Installing Dependencies
         run: npm ci
 
-      - name: 🚀 Building Poku
-        run: npm run build
-
       - name: 🎖️ Rock it
         run: npm run benchmark

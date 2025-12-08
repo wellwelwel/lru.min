@@ -1,6 +1,7 @@
 import { createLRU } from '../../lib/index.mjs';
 
 const max = 100000;
+const maxAge = 1000;
 const brute = 1000000;
 
 {
@@ -24,7 +25,7 @@ const brute = 1000000;
 }
 
 {
-  const lru = createLRU({ max, maxAge: 1 });
+  const lru = createLRU({ max, maxAge });
 
   for (let i = 0; i < brute; i++) {
     lru.set(`key-${i}`, i);

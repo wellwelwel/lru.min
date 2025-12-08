@@ -1,6 +1,7 @@
 import { LRUCache } from '../node_modules/lru-cache/dist/esm/index.js';
 
 const max = 100000;
+const ttl = 1000;
 const brute = 1000000;
 
 {
@@ -24,7 +25,7 @@ const brute = 1000000;
 }
 
 {
-  const lru = new LRUCache({ max, ttl: 1 });
+  const lru = new LRUCache({ max, ttl });
 
   for (let i = 0; i < brute; i++) {
     lru.set(`key-${i}`, i);
