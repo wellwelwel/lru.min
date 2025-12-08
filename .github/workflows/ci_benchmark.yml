@@ -28,6 +28,9 @@ jobs:
           key: npm-linux-${{ hashFiles('package-lock.json') }}
           restore-keys: npm-linux-
 
+      - name: ➕ Actions — Setup Hyperfine
+        run: cargo install --locked hyperfine
+
       - name: ➕ Cache dependencies (Benchmark)
         uses: actions/cache@v4
         with:
@@ -41,8 +44,5 @@ jobs:
       - name: 🚀 Building Poku
         run: npm run build
 
-      - name: 🎖️ Rock it (ESM)
-        run: npm run benchmark:esm
-
-      - name: 🎖️ Rock it (CJS)
-        run: npm run benchmark:cjs
+      - name: 🎖️ Rock it
+        run: npm run benchmark
