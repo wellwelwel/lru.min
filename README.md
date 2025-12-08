@@ -45,7 +45,7 @@ deno add npm:lru.min
 import { createLRU } from 'lru.min';
 
 const max = 2;
-const maxAge = 300000;
+const maxAge = 60_000;
 const onEviction = (key, value) => {
   console.log(`Key "${key}" with value "${value}" has been evicted.`);
 };
@@ -145,7 +145,7 @@ When `maxAge` is set, expired items are automatically removed when detected:
 
 > [!NOTE]
 >
-> All expired items trigger the `onEviction` callback when removed.
+> All expired items trigger the `onEviction` callback when used.
 
 ### Set a cache
 
