@@ -28,7 +28,7 @@
     "deno": ">=1.30.0"
   },
   "scripts": {
-    "benchmark": "npm run build && cd benchmark && npm ci && npm run benchmark:cjs && npm run benchmark:esm",
+    "benchmark": "npm run build && cd benchmark && npm ci && npm run benchmark:cjs && npm run benchmark:esm && node compare.js",
     "build:browser": "tsx tools/browserfy.ts",
     "build:esm": "esbuild src/index.ts --outfile=lib/index.mjs --platform=node --target=node12 --format=esm",
     "build": "rm -rf ./browser ./lib && tsc && npm run build:esm && npm run build:browser",

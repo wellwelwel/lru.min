@@ -1,7 +1,7 @@
 {
   "scripts": {
-    "benchmark:esm": "hyperfine --warmup 5 --runs 10 'node lru-cache/worker.mjs' 'node lru.min/worker.mjs'",
-    "benchmark:cjs": "hyperfine --warmup 5 --runs 10 'node lru-cache/worker.cjs' 'node lru.min/worker.cjs'"
+    "benchmark:esm": "hyperfine --warmup 5 --runs 10 --export-json 'results/mjs.json' --command-name 'lru-cache' 'node lru-cache/worker.mjs' --command-name 'lru.min' 'node lru.min/worker.mjs'",
+    "benchmark:cjs": "hyperfine --warmup 5 --runs 10 --export-json 'results/cjs.json' --command-name 'lru-cache' 'node lru-cache/worker.cjs' --command-name 'lru.min' 'node lru.min/worker.cjs'"
   },
   "dependencies": {
     "lru-cache": "^11.2.2"
