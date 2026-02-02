@@ -117,8 +117,8 @@ describe('Size suite', () => {
         ['key1000', 'value1000'],
         ['key999', 'value999'],
         ['key998', 'value998'],
+        ['key997', 'value997'],
         ['key996', 'value996'],
-        ['key995', 'value995'],
       ]
     );
   });
