@@ -253,17 +253,15 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
         for (let i = preserve; i < newMax; i++) free.push(i);
       } else {
-        const oldMax = max;
-
         keyList.length = newMax;
         valList.length = newMax;
         next.length = newMax;
         prev.length = newMax;
 
-        keyList.fill(undefined, oldMax);
-        valList.fill(undefined, oldMax);
-        next.fill(0, oldMax);
-        prev.fill(0, oldMax);
+        keyList.fill(undefined, max);
+        valList.fill(undefined, max);
+        next.fill(0, max);
+        prev.fill(0, max);
       }
 
       max = newMax;
