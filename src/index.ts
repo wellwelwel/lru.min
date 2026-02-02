@@ -23,7 +23,14 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
   const next: number[] = new Array(max).fill(0);
   const prev: number[] = new Array(max).fill(0);
 
-  const setTail = (index: number): undefined => {
+  const linkTail = (index: number): void => {
+    next[tail] = index;
+    prev[index] = tail;
+    next[index] = 0;
+    tail = index;
+  };
+
+  const moveToTail = (index: number): undefined => {
     if (index === tail) return;
 
     const nextIndex = next[index];
@@ -34,10 +41,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
     prev[nextIndex] = prevIndex;
 
-    next[tail] = index;
-    prev[index] = tail;
-    next[index] = 0;
-    tail = index;
+    linkTail(index);
   };
 
   const _shrink = (newMax: number): undefined => {
@@ -113,8 +117,6 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
     if (size === 0) head = tail = 0;
 
-    free.push(evictHead);
-
     return evictHead;
   };
 
@@ -133,16 +135,11 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
         valList[index] = value;
 
         if (size === 1) head = tail = index;
-        else {
-          next[tail] = index;
-          prev[index] = tail;
-          next[index] = 0;
-          tail = index;
-        }
+        else linkTail(index);
       } else {
         onEviction?.(key, valList[index]!);
         valList[index] = value;
-        setTail(index);
+        moveToTail(index);
       }
     },
 
@@ -151,7 +148,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       const index = keyMap.get(key);
 
       if (index === undefined) return;
-      if (index !== tail) setTail(index);
+      if (index !== tail) moveToTail(index);
 
       return valList[index];
     },
@@ -242,14 +239,14 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       let toPrune = Math.min(number, size);
 
       while (toPrune > 0) {
-        _evict();
+        free.push(_evict());
         toPrune--;
       }
     },
 
     /** Clears all key-value pairs from the cache. */
     clear(): undefined {
-      if (typeof onEviction === 'function') {
+      if (onEviction) {
         let current = head;
 
         for (let i = 0; i < size; i++) {
