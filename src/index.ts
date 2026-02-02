@@ -40,6 +40,62 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
     tail = index;
   };
 
+  const _shrink = (newMax: number): undefined => {
+    let current = tail;
+
+    const preserve = Math.min(size, newMax);
+    const remove = size - preserve;
+    const newKeyList: (Key | undefined)[] = new Array(preserve);
+    const newValList: (Value | undefined)[] = new Array(preserve);
+
+    for (let i = 0; i < remove; i++) {
+      const key = keyList[head]!;
+
+      onEviction?.(key, valList[head]!);
+      keyMap.delete(key);
+      head = next[head];
+    }
+
+    for (let i = preserve - 1; i >= 0; i--) {
+      newKeyList[i] = keyList[current];
+      newValList[i] = valList[current];
+      keyMap.set(keyList[current]!, i);
+      current = prev[current];
+    }
+
+    head = 0;
+    tail = preserve - 1;
+    size = preserve;
+
+    keyList.length = newMax;
+    valList.length = newMax;
+    next.length = newMax;
+    prev.length = newMax;
+
+    for (let i = 0; i < preserve; i++) {
+      keyList[i] = newKeyList[i];
+      valList[i] = newValList[i];
+      next[i] = i + 1;
+      prev[i] = i - 1;
+    }
+
+    free = [];
+
+    for (let i = preserve; i < newMax; i++) free.push(i);
+  };
+
+  const _grow = (newMax: number): undefined => {
+    keyList.length = newMax;
+    valList.length = newMax;
+    next.length = newMax;
+    prev.length = newMax;
+
+    keyList.fill(undefined, max);
+    valList.fill(undefined, max);
+    next.fill(0, max);
+    prev.fill(0, max);
+  };
+
   const _evict = (): number => {
     const evictHead = head;
     const key = keyList[evictHead]!;
@@ -209,61 +265,8 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
         throw new TypeError('`max` must be a positive integer');
 
       if (newMax === max) return;
-
-      if (newMax < max) {
-        let current = tail;
-
-        const preserve = Math.min(size, newMax);
-        const remove = size - preserve;
-        const newKeyList: (Key | undefined)[] = new Array(newMax);
-        const newValList: (Value | undefined)[] = new Array(newMax);
-        const newNext: number[] = new Array(newMax);
-        const newPrev: number[] = new Array(newMax);
-
-        for (let i = 0; i < remove; i++) {
-          const key = keyList[head]!;
-
-          onEviction?.(key, valList[head]!);
-          keyMap.delete(key);
-          head = next[head];
-        }
-
-        for (let i = preserve - 1; i >= 0; i--) {
-          newKeyList[i] = keyList[current];
-          newValList[i] = valList[current];
-          newNext[i] = i + 1;
-          newPrev[i] = i - 1;
-          keyMap.set(newKeyList[i]!, i);
-          current = prev[current];
-        }
-
-        head = 0;
-        tail = preserve - 1;
-        size = preserve;
-
-        keyList.length = newMax;
-        valList.length = newMax;
-        next.length = newMax;
-        prev.length = newMax;
-
-        for (let i = 0; i < preserve; i++) {
-          keyList[i] = newKeyList[i];
-          valList[i] = newValList[i];
-          next[i] = newNext[i];
-          prev[i] = newPrev[i];
-        }
-
-        free = [];
-
-        for (let i = preserve; i < newMax; i++) free.push(i);
-      } else {
-        const fill = newMax - max;
-
-        keyList.push(...new Array(fill).fill(undefined));
-        valList.push(...new Array(fill).fill(undefined));
-        next.push(...new Array(fill).fill(0));
-        prev.push(...new Array(fill).fill(0));
-      }
+      if (newMax < max) _shrink(newMax);
+      else _grow(newMax);
 
       max = newMax;
     },
