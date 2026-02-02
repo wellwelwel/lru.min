@@ -23,18 +23,16 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
   const next: number[] = new Array(max).fill(0);
   const prev: number[] = new Array(max).fill(0);
 
-  const setTail = (index: number, inList = true): undefined => {
+  const setTail = (index: number): undefined => {
     if (index === tail) return;
 
-    if (inList) {
-      const nextIndex = next[index];
-      const prevIndex = prev[index];
+    const nextIndex = next[index];
+    const prevIndex = prev[index];
 
-      if (index === head) head = nextIndex;
-      else next[prevIndex] = nextIndex;
+    if (index === head) head = nextIndex;
+    else next[prevIndex] = nextIndex;
 
-      prev[nextIndex] = prevIndex;
-    }
+    prev[nextIndex] = prevIndex;
 
     next[tail] = index;
     prev[index] = tail;
@@ -135,7 +133,12 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
         valList[index] = value;
 
         if (size === 1) head = tail = index;
-        else setTail(index, false);
+        else {
+          next[tail] = index;
+          prev[index] = tail;
+          next[index] = 0;
+          tail = index;
+        }
       } else {
         onEviction?.(key, valList[index]!);
         valList[index] = value;
