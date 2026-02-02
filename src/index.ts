@@ -51,7 +51,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
     valList[evictHead] = undefined;
     head = next[evictHead];
 
-    if (head !== 0) prev[head] = 0;
+    prev[head] = 0;
 
     size--;
 
