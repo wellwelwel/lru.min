@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.1.4](https://github.com/wellwelwel/lru.min/compare/v1.1.3...v1.1.4) (2026-02-02)
+
+
+### Bug Fixes
+
+* reset `prev` sentinel unconditionally on eviction ([#61](https://github.com/wellwelwel/lru.min/issues/61)) ([19ddd18](https://github.com/wellwelwel/lru.min/commit/19ddd18809fca44260043c5c575c77d054a6d895))
+* traverse linked list from head in `resize` eviction loop ([#59](https://github.com/wellwelwel/lru.min/issues/59)) ([733f281](https://github.com/wellwelwel/lru.min/commit/733f281a4c58d8ff45be795b84026b947fdf7f20))
+* traverse linked list from head in resize eviction loop ([733f281](https://github.com/wellwelwel/lru.min/commit/733f281a4c58d8ff45be795b84026b947fdf7f20))
+* use structural checks in linked list instead of sentinel comparisons ([#63](https://github.com/wellwelwel/lru.min/issues/63)) ([fd27698](https://github.com/wellwelwel/lru.min/commit/fd27698740eb661395c6b072263044725fc5faba))
+
+
+### Performance Improvements
+
+* improve `set` to avoid redundant writes ([#65](https://github.com/wellwelwel/lru.min/issues/65)) ([11d81c1](https://github.com/wellwelwel/lru.min/commit/11d81c1cb6f0346882a328730771dd542d34008b))
+* reduce `resize` allocations ([#62](https://github.com/wellwelwel/lru.min/issues/62)) ([709f5a9](https://github.com/wellwelwel/lru.min/commit/709f5a96989726a653d6cc8a826a9a455d4b4950))
+
 ## [1.1.3](https://github.com/wellwelwel/lru.min/compare/v1.1.2...v1.1.3) (2025-11-13)
 
 
