@@ -215,10 +215,8 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
         const preserve = Math.min(size, newMax);
         const remove = size - preserve;
-        const newKeyList: (Key | undefined)[] = new Array(newMax);
-        const newValList: (Value | undefined)[] = new Array(newMax);
-        const newNext: number[] = new Array(newMax);
-        const newPrev: number[] = new Array(newMax);
+        const newKeyList: (Key | undefined)[] = new Array(preserve);
+        const newValList: (Value | undefined)[] = new Array(preserve);
 
         for (let i = 0; i < remove; i++) {
           const key = keyList[head]!;
@@ -231,9 +229,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
         for (let i = preserve - 1; i >= 0; i--) {
           newKeyList[i] = keyList[current];
           newValList[i] = valList[current];
-          newNext[i] = i + 1;
-          newPrev[i] = i - 1;
-          keyMap.set(newKeyList[i]!, i);
+          keyMap.set(keyList[current]!, i);
           current = prev[current];
         }
 
@@ -249,20 +245,25 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
         for (let i = 0; i < preserve; i++) {
           keyList[i] = newKeyList[i];
           valList[i] = newValList[i];
-          next[i] = newNext[i];
-          prev[i] = newPrev[i];
+          next[i] = i + 1;
+          prev[i] = i - 1;
         }
 
         free = [];
 
         for (let i = preserve; i < newMax; i++) free.push(i);
       } else {
-        const fill = newMax - max;
+        const oldMax = max;
 
-        keyList.push(...new Array(fill).fill(undefined));
-        valList.push(...new Array(fill).fill(undefined));
-        next.push(...new Array(fill).fill(0));
-        prev.push(...new Array(fill).fill(0));
+        keyList.length = newMax;
+        valList.length = newMax;
+        next.length = newMax;
+        prev.length = newMax;
+
+        keyList.fill(undefined, oldMax);
+        valList.fill(undefined, oldMax);
+        next.fill(0, oldMax);
+        prev.fill(0, oldMax);
       }
 
       max = newMax;
