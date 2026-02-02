@@ -220,8 +220,13 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
         const newNext: number[] = new Array(newMax);
         const newPrev: number[] = new Array(newMax);
 
-        for (let i = 1; i <= remove; i++)
-          onEviction?.(keyList[i]!, valList[i]!);
+        for (let i = 0; i < remove; i++) {
+          const key = keyList[head]!;
+
+          onEviction?.(key, valList[head]!);
+          keyMap.delete(key);
+          head = next[head];
+        }
 
         for (let i = preserve - 1; i >= 0; i--) {
           newKeyList[i] = keyList[current];
