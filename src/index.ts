@@ -128,10 +128,23 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       let index = keyMap.get(key);
 
       if (index === undefined) {
-        index = size === max ? _evict() : free.length > 0 ? free.pop()! : size;
+        if (size === max) {
+          index = head;
+
+          const evictKey = keyList[index]!;
+
+          onEviction?.(evictKey, valList[index]!);
+          keyMap.delete(evictKey);
+
+          head = next[index];
+          prev[head] = 0;
+        } else {
+          index = free.length > 0 ? free.pop()! : size;
+          size++;
+        }
+
         keyMap.set(key, index);
         keyList[index] = key;
-        size++;
         valList[index] = value;
 
         if (size === 1) head = tail = index;
