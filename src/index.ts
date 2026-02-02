@@ -100,26 +100,6 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
     prev.fill(0, max);
   };
 
-  const _evict = (): number => {
-    const evictHead = head;
-    const key = keyList[evictHead]!;
-
-    onEviction?.(key, valList[evictHead]!);
-    keyMap.delete(key);
-
-    keyList[evictHead] = undefined;
-    valList[evictHead] = undefined;
-    head = next[evictHead];
-
-    prev[head] = 0;
-
-    size--;
-
-    if (size === 0) head = tail = 0;
-
-    return evictHead;
-  };
-
   return {
     /** Adds a key-value pair to the cache. Updates the value if the key already exists. */
     set(key: Key, value: Value): undefined {
@@ -252,9 +232,24 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       let toPrune = Math.min(number, size);
 
       while (toPrune > 0) {
-        free.push(_evict());
+        const evictHead = head;
+        const key = keyList[evictHead]!;
+
+        onEviction?.(key, valList[evictHead]!);
+        keyMap.delete(key);
+
+        keyList[evictHead] = undefined;
+        valList[evictHead] = undefined;
+        head = next[evictHead];
+
+        prev[head] = 0;
+
+        size--;
+        free.push(evictHead);
         toPrune--;
       }
+
+      if (size === 0) head = tail = 0;
     },
 
     /** Clears all key-value pairs from the cache. */
