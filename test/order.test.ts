@@ -88,10 +88,7 @@ describe('Order Suite', () => {
     LRU.set('key4', 'value4');
     LRU.set('key5', 'value5');
 
-    assert.deepStrictEqual(
-      [...LRU.keys()],
-      ['key5', 'key4', 'key3']
-    );
+    assert.deepStrictEqual([...LRU.keys()], ['key5', 'key4', 'key3']);
   });
 
   it('should preserve iteration order after updating an existing key and triggering eviction', () => {
@@ -105,10 +102,7 @@ describe('Order Suite', () => {
 
     LRU.set('key4', 'value4');
 
-    assert.deepStrictEqual(
-      [...LRU.keys()],
-      ['key4', 'key2', 'key3']
-    );
+    assert.deepStrictEqual([...LRU.keys()], ['key4', 'key2', 'key3']);
   });
 
   it('should preserve iteration order after reordering items with get', () => {
@@ -121,9 +115,6 @@ describe('Order Suite', () => {
     LRU.get('key1');
     LRU.get('key3');
 
-    assert.deepStrictEqual(
-      [...LRU.keys()],
-      ['key3', 'key1', 'key2']
-    );
+    assert.deepStrictEqual([...LRU.keys()], ['key3', 'key1', 'key2']);
   });
 });
