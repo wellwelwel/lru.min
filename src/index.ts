@@ -23,16 +23,16 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
   const next: number[] = new Array(max).fill(0);
   const prev: number[] = new Array(max).fill(0);
 
-  const setTail = (index: number, type: 'set' | 'get'): undefined => {
+  const setTail = (index: number): undefined => {
     if (index === tail) return;
 
     const nextIndex = next[index];
     const prevIndex = prev[index];
 
     if (index === head) head = nextIndex;
-    else if (type === 'get' || prevIndex !== 0) next[prevIndex] = nextIndex;
+    else next[prevIndex] = nextIndex;
 
-    if (nextIndex !== 0) prev[nextIndex] = prevIndex;
+    prev[nextIndex] = prevIndex;
 
     next[tail] = index;
     prev[index] = tail;
@@ -130,12 +130,20 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
         keyMap.set(key, index);
         keyList[index] = key;
         size++;
-      } else onEviction?.(key, valList[index]!);
+        valList[index] = value;
 
-      valList[index] = value;
-
-      if (size === 1) head = tail = index;
-      else setTail(index, 'set');
+        if (size === 1) head = tail = index;
+        else {
+          next[tail] = index;
+          prev[index] = tail;
+          next[index] = 0;
+          tail = index;
+        }
+      } else {
+        onEviction?.(key, valList[index]!);
+        valList[index] = value;
+        setTail(index);
+      }
     },
 
     /** Retrieves the value for a given key and moves the key to the most recent position. */
@@ -143,7 +151,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       const index = keyMap.get(key);
 
       if (index === undefined) return;
-      if (index !== tail) setTail(index, 'get');
+      if (index !== tail) setTail(index);
 
       return valList[index];
     },
@@ -218,11 +226,11 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       const prevIndex = prev[index];
       const nextIndex = next[index];
 
-      if (prevIndex !== 0) next[prevIndex] = nextIndex;
-      if (nextIndex !== 0) prev[nextIndex] = prevIndex;
-
       if (index === head) head = nextIndex;
+      else next[prevIndex] = nextIndex;
+
       if (index === tail) tail = prevIndex;
+      else prev[nextIndex] = prevIndex;
 
       size--;
 
