@@ -43,8 +43,8 @@
     "size": "ls -lh lib/index.mjs | awk '{print $5}'"
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
-    "@babel/preset-env": "^7.29.0",
+    "@babel/core": "^8.0.1",
+    "@babel/preset-env": "^8.0.2",
     "@biomejs/biome": "^1.9.4",
     "@types/babel__core": "^7.20.5",
     "@types/node": "^24.10.9",
