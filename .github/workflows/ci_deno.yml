@@ -13,7 +13,9 @@ jobs:
     timeout-minutes: 5
     strategy:
       fail-fast: false
-    name: Deno
+      matrix:
+        deno-version: ['v1.x', 'v2.x']
+    name: Deno ${{ matrix.deno-version }}
     steps:
       - name: ➕ Actions - Checkout
         uses: actions/checkout@v4
@@ -27,7 +29,7 @@ jobs:
       - name: ➕ Actions - Setup Deno
         uses: denoland/setup-deno@v1
         with:
-          deno-version: 'v1.x'
+          deno-version: ${{ matrix.deno-version }}
 
       - name: ➕ Cache dependencies
         uses: actions/cache@v4

@@ -1,6 +1,6 @@
 import { setFlagsFromString } from 'node:v8';
 import { runInNewContext } from 'node:vm';
-import { describe, it, assert } from 'poku';
+import { describe, it, assert, skip } from 'poku';
 import { createLRU } from '../src/index.ts';
 
 type Key = { id: number };
@@ -12,29 +12,29 @@ const runtime = globalThis as typeof globalThis & {
   Bun?: { gc: (force: boolean) => void };
 };
 
-const resolveGC = (): (() => void) => {
+const resolveGC = (): (() => void) | undefined => {
+  const { Bun } = runtime;
+
+  if (Bun) return () => Bun.gc(true);
   if (runtime.gc) return runtime.gc;
 
-  setFlagsFromString('--expose-gc');
+  try {
+    setFlagsFromString('--expose-gc');
 
-  const exposed: () => void = runInNewContext('gc');
+    const exposed: (() => void) | undefined = runInNewContext('gc');
 
-  return exposed;
+    return exposed;
+  } catch {
+    return undefined;
+  }
 };
 
-let gc: (() => void) | undefined;
+const gc = resolveGC();
+
+if (!gc) skip('this runtime cannot force garbage collection');
 
 const collectGarbage = async (): Promise<void> => {
   await new Promise((resolve) => setTimeout(resolve, 0));
-
-  if (runtime.Bun) {
-    runtime.Bun.gc(true);
-    runtime.Bun.gc(true);
-
-    return;
-  }
-
-  if (!gc) gc = resolveGC();
 
   gc();
   gc();
