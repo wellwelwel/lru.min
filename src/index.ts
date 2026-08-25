@@ -85,7 +85,11 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
     free = [];
 
-    for (let i = preserve; i < newMax; i++) free.push(i);
+    for (let i = preserve; i < newMax; i++) {
+      keyList[i] = undefined;
+      valList[i] = undefined;
+      free.push(i);
+    }
   };
 
   const _grow = (newMax: number): undefined => {
