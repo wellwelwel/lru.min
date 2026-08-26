@@ -66,7 +66,7 @@ describe('Eviction callback re-entrancy suite', () => {
     assert.strictEqual(LRU.peek('x'), 'value:x');
   });
 
-  it('should keep the counters possible when evict triggers a clear', () => {
+  it('should keep the counters consistent when evict triggers a clear', () => {
     const evicteds: string[] = [];
     let reentered = false;
 
