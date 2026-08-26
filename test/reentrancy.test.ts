@@ -115,9 +115,9 @@ describe('Eviction callback re-entrancy suite', () => {
 
     const LRU = createLRU<string, string>({
       max: 3,
-      onEviction: (key) => {
+      onEviction: () => {
         announced++;
-        LRU.set(`after:${key}`, 'value');
+        LRU.set(`after:${announced}`, 'value');
       },
     });
 
@@ -125,7 +125,7 @@ describe('Eviction callback re-entrancy suite', () => {
 
     assert.throws(
       () => LRU.set('d', 'value:d'),
-      /re-entered the cache without settling/
+      /exceeded the re-entrancy limit/
     );
 
     const keys = [...LRU.keys()];
@@ -161,5 +161,118 @@ describe('Eviction callback re-entrancy suite', () => {
     assert.deepStrictEqual(evicteds, ['a', 'b', 'c']);
     assert.strictEqual(LRU.size, 0);
     assert.strictEqual(LRU.available, 3);
+  });
+
+  it('should let a finite chain of replacements settle', () => {
+    let calls = 0;
+
+    const LRU = createLRU<string, string>({
+      max: 1,
+      onEviction: (key) => {
+        calls++;
+
+        if (calls <= 3) LRU.set(key, `value:${calls}`);
+      },
+    });
+
+    LRU.set('a', 'value:0');
+    LRU.set('a', 'value:trigger');
+
+    assert.strictEqual(calls, 4);
+    assert.strictEqual(LRU.size, 1);
+    assert.strictEqual(LRU.peek('a'), 'value:3');
+  });
+
+  it('should let clear announce callbacks that update other entries', () => {
+    const LRU = createLRU<string, number>({
+      max: 10,
+      onEviction: (key) => {
+        if (key.startsWith('stats:')) return;
+
+        LRU.set('stats:a', (LRU.peek('stats:a') ?? 0) + 1);
+        LRU.set('stats:b', (LRU.peek('stats:b') ?? 0) + 1);
+      },
+    });
+
+    for (let i = 0; i < 10; i++) LRU.set(`item:${i}`, i);
+
+    LRU.clear();
+
+    assert.strictEqual(LRU.size, 2);
+    assert.strictEqual(LRU.peek('stats:a'), 10);
+    assert.strictEqual(LRU.peek('stats:b'), 10);
+  });
+
+  it('should scale the limit with the work of the operation', () => {
+    const LRU = createLRU<string, number>({
+      max: 30_000,
+      onEviction: (key) => {
+        if (key.startsWith('stats:')) return;
+
+        for (let i = 0; i < 3; i++) {
+          LRU.set(`stats:${i}`, (LRU.peek(`stats:${i}`) ?? 0) + 1);
+        }
+      },
+    });
+
+    for (let i = 0; i < 30_000; i++) LRU.set(`item:${i}`, i);
+
+    LRU.clear();
+
+    assert.strictEqual(LRU.size, 3);
+    assert.strictEqual(LRU.peek('stats:0'), 30_000);
+    assert.strictEqual(LRU.peek('stats:2'), 30_000);
+  });
+
+  it('should stop a callback that fans out before exhausting memory', () => {
+    let calls = 0;
+
+    const LRU = createLRU<string, number>({
+      max: 1,
+      onEviction: () => {
+        calls++;
+
+        for (let i = 0; i < 4096; i++) LRU.set(`fan:${calls}:${i}`, i);
+      },
+    });
+
+    LRU.set('a', 0);
+
+    assert.throws(() => LRU.set('b', 0), /exceeded the re-entrancy limit/);
+
+    assert.strictEqual(calls < 100, true, 'gives up early');
+    assert.strictEqual(LRU.size, 1);
+    assert.strictEqual([...LRU.keys()].length, 1);
+  });
+
+  it('should keep a callback error as the cause when the limit is hit', () => {
+    const failure = new Error('callback failed');
+    let announced = 0;
+
+    const LRU = createLRU<string, string>({
+      max: 3,
+      onEviction: () => {
+        announced++;
+        LRU.set(`after:${announced}`, 'value');
+
+        if (announced === 1) throw failure;
+      },
+    });
+
+    for (const key of ['a', 'b', 'c']) LRU.set(key, `value:${key}`);
+
+    let caught: unknown;
+
+    try {
+      LRU.set('d', 'value:d');
+    } catch (error) {
+      caught = error;
+    }
+
+    assert.strictEqual(caught instanceof RangeError, true);
+    assert.strictEqual(
+      caught instanceof RangeError && Reflect.get(caught, 'cause'),
+      failure
+    );
   });
 });

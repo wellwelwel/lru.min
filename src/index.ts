@@ -70,28 +70,36 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
   };
 
   const drainQueued = (thrown: boolean, thrownError: unknown): undefined => {
-    const limit = evictedKeys.length + state.max;
+    const initial = evictedKeys.length;
+    const limit = initial + Math.max(initial * 4, 65_536);
 
     let failed = thrown;
     let failure = thrownError;
     let cursor = 0;
 
     while (cursor < evictedKeys.length) {
-      if (cursor === limit) {
+      if (evictedKeys.length > limit) {
         evictedKeys.length = 0;
         evictedValues.length = 0;
         draining = false;
 
-        throw new RangeError(
-          '`onEviction` re-entered the cache without settling'
+        const error = new RangeError(
+          `\`onEviction\` exceeded the re-entrancy limit of ${limit} queued notifications`
         );
+
+        if (failed) Object.assign(error, { cause: failure });
+
+        throw error;
       }
 
       const key = evictedKeys[cursor]!;
       const value = evictedValues[cursor]!;
 
-      evictedKeys[cursor] = undefined;
-      evictedValues[cursor] = undefined;
+      if (cursor >= initial) {
+        evictedKeys[cursor] = undefined;
+        evictedValues[cursor] = undefined;
+      }
+
       cursor++;
 
       try {
@@ -392,7 +400,7 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
     /** Evicts the oldest item or the specified number of the oldest items from the cache. */
     evict: (number: number): undefined => {
-      let toPrune = Math.min(number, state.size);
+      let toPrune = Math.min(Math.ceil(number), state.size);
       let slot = onEviction !== null && toPrune > 0 ? reserve(toPrune) : 0;
 
       while (toPrune > 0) {

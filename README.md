@@ -130,6 +130,15 @@ const LRU = createLRU({
 });
 ```
 
+> [!TIP]
+>
+> - `onEviction` naturally runs after the cache has committed the change, so the callback can safely call any method.
+
+> [!NOTE]
+>
+> - Notifications caused from inside a callback are queued and delivered in order after it returns. If a callback throws, the remaining notifications are still delivered and the error is rethrown at the end.
+> - An operation can queue at most `65_536` notifications, or four times the number it produced by itself, whichever is greater. Beyond that, a `RangeError` is thrown, the pending notifications are dropped, and the cache remains consistent. If a callback had thrown before, that error becomes the `RangeError`'s `cause`.
+
 ### Set a cache
 
 Adds a key-value pair to the cache. Updates the value if the key already exists

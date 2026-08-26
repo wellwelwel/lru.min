@@ -111,4 +111,43 @@ describe('Memory release suite', () => {
       assert.notStrictEqual(ref.value.deref(), undefined);
     }
   });
+
+  it('should release re-entrant notifications as they are delivered', async () => {
+    const pending: Value[] = [{ token: 'x' }, { token: 'y' }, { token: 'z' }];
+    const refs = pending.map((value) => new WeakRef(value));
+    const seen: string[] = [];
+
+    const LRU = createLRU<string, Value>({
+      max: 3,
+      onEviction: (key) => {
+        seen.push(key);
+
+        if (key === 'a') {
+          while (pending.length > 0) {
+            const value = pending.shift()!;
+
+            LRU.set(value.token, value);
+            LRU.set(value.token, { token: `${value.token}:2` });
+          }
+
+          return;
+        }
+
+        if (key === 'z') {
+          gc!();
+          gc!();
+
+          assert.strictEqual(refs[0]!.deref(), undefined);
+        }
+      },
+    });
+
+    for (const key of ['a', 'b', 'c']) LRU.set(key, { token: key });
+
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    LRU.clear();
+
+    assert.deepStrictEqual(seen, ['a', 'b', 'c', 'x', 'y', 'z']);
+  });
 });
