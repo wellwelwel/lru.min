@@ -119,7 +119,7 @@ const { createLRU } = require('lru.min');
 const LRU = createLRU({ max: 150_000 });
 ```
 
-Also, you can set a callback for every deletion/eviction:
+Also, you can set a callback for evictions, deletions, and replacements:
 
 ```ts
 const LRU = createLRU({
@@ -190,8 +190,9 @@ LRU.evict(1000);
 
 > [!TIP]
 >
-> - Methods that perform eviction(s) when maximum size is reached: `set` and `resize`.
-> - Methods that always perform eviction(s): `delete`, `clear`, and `evict` itself.
+> - `set` evicts the oldest item when the cache is full, and replaces the value of a key it already holds at any fill level.
+> - `resize` evicts only when the new maximum no longer fits every stored item.
+> - `delete`, `clear`, and `evict` always remove the items they name.
 
 ### Resize the cache
 
