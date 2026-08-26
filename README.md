@@ -203,7 +203,8 @@ LRU.resize(50_000);
 ```
 
 - Complexity:
-  - Increasing: **O(newMax - max)**.
+  - Increasing: amortized **O(newMax - max)**.
+    - A growth that exceeds the reserved capacity copies the index arrays once (**O(max)**).
   - Downsizing: **O(n)**.
 
 ### Clear the cache

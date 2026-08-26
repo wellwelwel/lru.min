@@ -220,13 +220,18 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
   };
 
   const _grow = (newMax: number): undefined => {
-    const next = new Int32Array(newMax);
-    const prev = new Int32Array(newMax);
+    const capacity = state.next.length;
 
-    next.set(state.next);
-    prev.set(state.prev);
-    state.next = next;
-    state.prev = prev;
+    if (newMax > capacity) {
+      const reserved = Math.max(newMax, capacity + (capacity >>> 1) + 16);
+      const next = new Int32Array(reserved);
+      const prev = new Int32Array(reserved);
+
+      next.set(state.next);
+      prev.set(state.prev);
+      state.next = next;
+      state.prev = prev;
+    }
 
     for (let i = state.max; i < newMax; i++) {
       keyList.push(undefined);
