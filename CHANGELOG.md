@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.5](https://github.com/wellwelwel/lru.min/compare/v1.1.4...v1.1.5) (2026-08-25)
+
+
+### Bug Fixes
+
+* release stale key and value copies left behind by resize ([#69](https://github.com/wellwelwel/lru.min/issues/69)) ([0408402](https://github.com/wellwelwel/lru.min/commit/0408402440c078878871ac0078a42605e48339e1))
+
 ## [1.1.4](https://github.com/wellwelwel/lru.min/compare/v1.1.3...v1.1.4) (2026-02-02)
 
 
