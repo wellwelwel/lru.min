@@ -79,4 +79,83 @@ describe('Resize strict suite', () => {
       ['key1', 'key2', 'key3']
     );
   });
+
+  it('should keep order and evictions intact across repeated growth', () => {
+    const evicted: string[] = [];
+    const LRU = createLRU<string, number>({
+      max: 5,
+      onEviction: (key) => {
+        evicted.push(key);
+      },
+    });
+
+    for (let i = 1; i <= 5; i++) LRU.set(`key${i}`, i);
+
+    LRU.resize(6);
+    LRU.set('key6', 6);
+    LRU.resize(7);
+    LRU.set('key7', 7);
+    LRU.get('key2');
+    LRU.set('key8', 8);
+    LRU.set('key9', 9);
+
+    assert.strictEqual(LRU.max, 7);
+    assert.strictEqual(LRU.size, 7);
+    assert.deepStrictEqual(
+      [...LRU.keys()],
+      ['key9', 'key8', 'key2', 'key7', 'key6', 'key5', 'key4']
+    );
+    assert.deepStrictEqual(evicted, ['key1', 'key3']);
+
+    LRU.delete('key6');
+    LRU.resize(3);
+
+    assert.deepStrictEqual([...LRU.keys()], ['key9', 'key8', 'key2']);
+    assert.deepStrictEqual(evicted, [
+      'key1',
+      'key3',
+      'key6',
+      'key4',
+      'key5',
+      'key7',
+    ]);
+
+    LRU.resize(9);
+    LRU.resize(12);
+
+    for (let i = 10; i <= 19; i++) LRU.set(`key${i}`, i);
+
+    assert.strictEqual(LRU.max, 12);
+    assert.strictEqual(LRU.size, 12);
+    assert.deepStrictEqual(
+      [...LRU.keys()],
+      [
+        'key19',
+        'key18',
+        'key17',
+        'key16',
+        'key15',
+        'key14',
+        'key13',
+        'key12',
+        'key11',
+        'key10',
+        'key9',
+        'key8',
+      ]
+    );
+    assert.deepStrictEqual(evicted, [
+      'key1',
+      'key3',
+      'key6',
+      'key4',
+      'key5',
+      'key7',
+      'key2',
+    ]);
+    assert.deepStrictEqual(
+      [...LRU.values()].reverse(),
+      [8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19]
+    );
+  });
 });

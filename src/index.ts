@@ -1,42 +1,173 @@
 export type CacheOptions<Key = unknown, Value = unknown> = {
   /** Maximum number of items the cache can hold. */
   max: number;
-  /** Function called when an item is evicted from the cache. */
+  /** Function called with the key and the value displaced by an eviction, deletion, or replacement. */
   onEviction?: (key: Key, value: Value) => unknown;
 };
 
+type State = {
+  size: number;
+  head: number;
+  tail: number;
+  free: number;
+  max: number;
+  next: Int32Array;
+  prev: Int32Array;
+};
+
 export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
-  let { max } = options;
+  const { max, onEviction = null } = options;
 
   if (!(Number.isInteger(max) && max > 0))
     throw new TypeError('`max` must be a positive integer');
 
-  let size = 0;
-  let head = 0;
-  let tail = 0;
-  let free: number[] = [];
+  let draining = false;
 
-  const { onEviction } = options;
+  const states = new WeakMap<object, State>();
+
+  const accessors = {
+    /** Returns the maximum number of items that can be stored in the cache. */
+    get max(): number {
+      return states.get(this)!.max;
+    },
+
+    /** Returns the number of items currently stored in the cache. */
+    get size(): number {
+      return states.get(this)!.size;
+    },
+
+    /** Returns the number of currently available slots in the cache before reaching the maximum size. */
+    get available(): number {
+      const state = states.get(this)!;
+
+      return state.max - state.size;
+    },
+  };
+
+  const state: State = {
+    size: 0,
+    head: 0,
+    tail: 0,
+    free: -1,
+    max,
+    next: new Int32Array(max),
+    prev: new Int32Array(max),
+  };
+
   const keyMap: Map<Key, number> = new Map();
   const keyList: (Key | undefined)[] = new Array(max).fill(undefined);
   const valList: (Value | undefined)[] = new Array(max).fill(undefined);
-  const next: number[] = new Array(max).fill(0);
-  const prev: number[] = new Array(max).fill(0);
+  const evictedKeys: (Key | undefined)[] = [];
+  const evictedValues: (Value | undefined)[] = [];
 
-  const linkTail = (index: number): void => {
-    next[tail] = index;
-    prev[index] = tail;
-    next[index] = 0;
-    tail = index;
+  const reserve = (count: number): number => {
+    const start = evictedKeys.length;
+
+    evictedKeys.length = start + count;
+    evictedValues.length = start + count;
+
+    return start;
+  };
+
+  const drainQueued = (thrown: boolean, thrownError: unknown): undefined => {
+    const initial = evictedKeys.length;
+    const limit = initial + Math.max(initial * 4, 65_536);
+
+    let failed = thrown;
+    let failure = thrownError;
+    let cursor = 0;
+
+    while (cursor < evictedKeys.length) {
+      if (evictedKeys.length > limit) {
+        evictedKeys.length = 0;
+        evictedValues.length = 0;
+        draining = false;
+
+        const error = new RangeError(
+          `\`onEviction\` exceeded the re-entrancy limit of ${limit} queued notifications`
+        );
+
+        if (failed) Object.assign(error, { cause: failure });
+
+        throw error;
+      }
+
+      const key = evictedKeys[cursor]!;
+      const value = evictedValues[cursor]!;
+
+      if (cursor >= initial) {
+        evictedKeys[cursor] = undefined;
+        evictedValues[cursor] = undefined;
+      }
+
+      cursor++;
+
+      try {
+        onEviction!(key, value);
+      } catch (error) {
+        if (!failed) {
+          failure = error;
+          failed = true;
+        }
+      }
+    }
+
+    evictedKeys.length = 0;
+    evictedValues.length = 0;
+    draining = false;
+
+    if (failed) throw failure;
+  };
+
+  const drain = (): undefined => {
+    if (draining || evictedKeys.length === 0) return;
+
+    draining = true;
+
+    drainQueued(false, undefined);
+  };
+
+  const announce = (key: Key, value: Value): undefined => {
+    if (draining) {
+      evictedKeys.push(key);
+      evictedValues.push(value);
+
+      return;
+    }
+
+    draining = true;
+
+    let failed = false;
+    let failure: unknown;
+
+    try {
+      onEviction!(key, value);
+    } catch (error) {
+      failure = error;
+      failed = true;
+    }
+
+    if (failed || evictedKeys.length > 0) return drainQueued(failed, failure);
+
+    draining = false;
+  };
+
+  const linkTail = (index: number): undefined => {
+    const tail = state.tail;
+
+    state.next[tail] = index;
+    state.prev[index] = tail;
+    state.tail = index;
   };
 
   const moveToTail = (index: number): undefined => {
-    if (index === tail) return;
+    if (index === state.tail) return;
 
+    const { next, prev } = state;
     const nextIndex = next[index];
     const prevIndex = prev[index];
 
-    if (index === head) head = nextIndex;
+    if (index === state.head) state.head = nextIndex;
     else next[prevIndex] = nextIndex;
 
     prev[nextIndex] = prevIndex;
@@ -45,36 +176,38 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
   };
 
   const _shrink = (newMax: number): undefined => {
-    let current = tail;
-
-    const preserve = Math.min(size, newMax);
-    const remove = size - preserve;
+    const preserve = Math.min(state.size, newMax);
+    const remove = state.size - preserve;
     const newKeyList: (Key | undefined)[] = new Array(preserve);
     const newValList: (Value | undefined)[] = new Array(preserve);
+    const next = new Int32Array(newMax);
+    const prev = new Int32Array(newMax);
+
+    let current = state.tail;
+    let slot = onEviction !== null && remove > 0 ? reserve(remove) : 0;
 
     for (let i = 0; i < remove; i++) {
-      const key = keyList[head]!;
+      const key = keyList[state.head]!;
 
-      onEviction?.(key, valList[head]!);
+      if (onEviction !== null) {
+        evictedKeys[slot] = key;
+        evictedValues[slot] = valList[state.head];
+        slot++;
+      }
+
       keyMap.delete(key);
-      head = next[head];
+      state.head = state.next[state.head];
     }
 
     for (let i = preserve - 1; i >= 0; i--) {
       newKeyList[i] = keyList[current];
       newValList[i] = valList[current];
       keyMap.set(keyList[current]!, i);
-      current = prev[current];
+      current = state.prev[current];
     }
-
-    head = 0;
-    tail = preserve - 1;
-    size = preserve;
 
     keyList.length = newMax;
     valList.length = newMax;
-    next.length = newMax;
-    prev.length = newMax;
 
     for (let i = 0; i < preserve; i++) {
       keyList[i] = newKeyList[i];
@@ -83,28 +216,38 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       prev[i] = i - 1;
     }
 
-    free = [];
+    keyList.fill(undefined, preserve);
+    valList.fill(undefined, preserve);
 
-    for (let i = preserve; i < newMax; i++) {
-      keyList[i] = undefined;
-      valList[i] = undefined;
-      free.push(i);
-    }
+    state.size = preserve;
+    state.head = 0;
+    state.tail = preserve - 1;
+    state.free = -1;
+    state.next = next;
+    state.prev = prev;
   };
 
   const _grow = (newMax: number): undefined => {
-    keyList.length = newMax;
-    valList.length = newMax;
-    next.length = newMax;
-    prev.length = newMax;
+    const capacity = state.next.length;
 
-    keyList.fill(undefined, max);
-    valList.fill(undefined, max);
-    next.fill(0, max);
-    prev.fill(0, max);
+    if (newMax > capacity) {
+      const reserved = Math.max(newMax, capacity + (capacity >>> 1) + 16);
+      const next = new Int32Array(reserved);
+      const prev = new Int32Array(reserved);
+
+      next.set(state.next);
+      prev.set(state.prev);
+      state.next = next;
+      state.prev = prev;
+    }
+
+    for (let i = state.max; i < newMax; i++) {
+      keyList.push(undefined);
+      valList.push(undefined);
+    }
   };
 
-  return {
+  const methods = {
     /** Adds a key-value pair to the cache. Updates the value if the key already exists. */
     set(key: Key, value: Value): undefined {
       if (key === undefined) return;
@@ -112,32 +255,50 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       let index = keyMap.get(key);
 
       if (index === undefined) {
-        if (size === max) {
-          index = head;
+        if (state.size === state.max) {
+          index = state.head;
 
-          const evictKey = keyList[index]!;
+          const evictedKey = keyList[index]!;
+          const evictedValue = onEviction === null ? undefined : valList[index];
 
-          onEviction?.(evictKey, valList[index]!);
-          keyMap.delete(evictKey);
+          state.head = state.next[index];
+          keyList[index] = key;
+          valList[index] = value;
 
-          head = next[index];
-          prev[head] = 0;
-        } else {
-          index = free.length > 0 ? free.pop()! : size;
-          size++;
+          if (state.size === 1) state.head = state.tail = index;
+          else linkTail(index);
+
+          keyMap.delete(evictedKey);
+          keyMap.set(key, index);
+
+          if (onEviction !== null) announce(evictedKey, evictedValue!);
+
+          return;
         }
 
-        keyMap.set(key, index);
+        index = state.free;
+
+        if (index === -1) index = state.size;
+        else state.free = state.next[index];
+
+        state.size++;
         keyList[index] = key;
         valList[index] = value;
 
-        if (size === 1) head = tail = index;
+        if (state.size === 1) state.head = state.tail = index;
         else linkTail(index);
-      } else {
-        onEviction?.(key, valList[index]!);
-        valList[index] = value;
-        moveToTail(index);
+
+        keyMap.set(key, index);
+
+        return;
       }
+
+      const replaced = onEviction === null ? undefined : valList[index];
+
+      valList[index] = value;
+      moveToTail(index);
+
+      if (onEviction !== null) announce(key, replaced!);
     },
 
     /** Retrieves the value for a given key and moves the key to the most recent position. */
@@ -145,7 +306,8 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       const index = keyMap.get(key);
 
       if (index === undefined) return;
-      if (index !== tail) moveToTail(index);
+
+      moveToTail(index);
 
       return valList[index];
     },
@@ -162,45 +324,45 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
     /** Iterates over all keys in the cache, from most recent to least recent. */
     *keys(): IterableIterator<Key> {
-      let current = tail;
+      let current = state.tail;
 
-      for (let i = 0; i < size; i++) {
+      for (let i = 0; i < state.size; i++) {
         yield keyList[current]!;
-        current = prev[current];
+        current = state.prev[current];
       }
     },
 
     /** Iterates over all values in the cache, from most recent to least recent. */
     *values(): IterableIterator<Value> {
-      let current = tail;
+      let current = state.tail;
 
-      for (let i = 0; i < size; i++) {
+      for (let i = 0; i < state.size; i++) {
         yield valList[current]!;
-        current = prev[current];
+        current = state.prev[current];
       }
     },
 
     /** Iterates over `[key, value]` pairs in the cache, from most recent to least recent. */
     *entries(): IterableIterator<[Key, Value]> {
-      let current = tail;
+      let current = state.tail;
 
-      for (let i = 0; i < size; i++) {
+      for (let i = 0; i < state.size; i++) {
         yield [keyList[current]!, valList[current]!];
-        current = prev[current];
+        current = state.prev[current];
       }
     },
 
     /** Iterates over each value-key pair in the cache, from most recent to least recent. */
     forEach: (callback: (value: Value, key: Key) => unknown): undefined => {
-      let current = tail;
+      let current = state.tail;
 
-      for (let i = 0; i < size; i++) {
+      for (let i = 0; i < state.size; i++) {
         const key = keyList[current]!;
         const value = valList[current]!;
 
         callback(value, key);
 
-        current = prev[current];
+        current = state.prev[current];
       }
     },
 
@@ -210,60 +372,74 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
 
       if (index === undefined) return false;
 
-      onEviction?.(key, valList[index]!);
-      keyMap.delete(key);
-      free.push(index);
+      const removed = onEviction === null ? undefined : valList[index];
 
       keyList[index] = undefined;
       valList[index] = undefined;
 
-      const prevIndex = prev[index];
+      const { next, prev } = state;
       const nextIndex = next[index];
+      const prevIndex = prev[index];
 
-      if (index === head) head = nextIndex;
+      if (index === state.head) state.head = nextIndex;
       else next[prevIndex] = nextIndex;
 
-      if (index === tail) tail = prevIndex;
+      if (index === state.tail) state.tail = prevIndex;
       else prev[nextIndex] = prevIndex;
 
-      size--;
+      next[index] = state.free;
+      state.free = index;
+      state.size--;
+
+      keyMap.delete(key);
+
+      if (onEviction !== null) announce(key, removed!);
 
       return true;
     },
 
     /** Evicts the oldest item or the specified number of the oldest items from the cache. */
     evict: (number: number): undefined => {
-      let toPrune = Math.min(number, size);
+      let toPrune = Math.min(Math.ceil(number), state.size);
+      let slot = onEviction !== null && toPrune > 0 ? reserve(toPrune) : 0;
 
       while (toPrune > 0) {
-        const evictHead = head;
+        const evictHead = state.head;
         const key = keyList[evictHead]!;
 
-        onEviction?.(key, valList[evictHead]!);
-        keyMap.delete(key);
+        if (onEviction !== null) {
+          evictedKeys[slot] = key;
+          evictedValues[slot] = valList[evictHead];
+          slot++;
+        }
 
         keyList[evictHead] = undefined;
         valList[evictHead] = undefined;
-        head = next[evictHead];
-
-        prev[head] = 0;
-
-        size--;
-        free.push(evictHead);
+        state.head = state.next[evictHead];
+        state.next[evictHead] = state.free;
+        state.free = evictHead;
+        state.size--;
         toPrune--;
+
+        keyMap.delete(key);
       }
 
-      if (size === 0) head = tail = 0;
+      if (state.size === 0) state.head = state.tail = 0;
+
+      if (onEviction !== null) drain();
     },
 
     /** Clears all key-value pairs from the cache. */
     clear(): undefined {
-      if (onEviction) {
-        let current = head;
+      if (onEviction !== null && state.size > 0) {
+        let current = state.head;
+        let slot = reserve(state.size);
 
-        for (let i = 0; i < size; i++) {
-          onEviction(keyList[current]!, valList[current]!);
-          current = next[current];
+        for (let i = 0; i < state.size; i++) {
+          evictedKeys[slot] = keyList[current];
+          evictedValues[slot] = valList[current];
+          slot++;
+          current = state.next[current];
         }
       }
 
@@ -271,9 +447,11 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       keyList.fill(undefined);
       valList.fill(undefined);
 
-      free = [];
-      size = 0;
-      head = tail = 0;
+      state.size = 0;
+      state.head = state.tail = 0;
+      state.free = -1;
+
+      if (onEviction !== null) drain();
     },
 
     /** Resizes the cache to a new maximum size, evicting items if necessary. */
@@ -281,26 +459,22 @@ export const createLRU = <Key, Value>(options: CacheOptions<Key, Value>) => {
       if (!(Number.isInteger(newMax) && newMax > 0))
         throw new TypeError('`max` must be a positive integer');
 
-      if (newMax === max) return;
-      if (newMax < max) _shrink(newMax);
+      if (newMax === state.max) return;
+      if (newMax < state.max) _shrink(newMax);
       else _grow(newMax);
 
-      max = newMax;
-    },
+      state.max = newMax;
 
-    /** Returns the maximum number of items that can be stored in the cache. */
-    get max() {
-      return max;
-    },
-
-    /** Returns the number of items currently stored in the cache. */
-    get size() {
-      return size;
-    },
-
-    /** Returns the number of currently available slots in the cache before reaching the maximum size. */
-    get available() {
-      return max - size;
+      if (onEviction !== null) drain();
     },
   };
+
+  const cache: typeof methods & typeof accessors = Object.setPrototypeOf(
+    methods,
+    accessors
+  );
+
+  states.set(cache, state);
+
+  return cache;
 };

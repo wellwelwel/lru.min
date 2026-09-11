@@ -119,7 +119,7 @@ const { createLRU } = require('lru.min');
 const LRU = createLRU({ max: 150_000 });
 ```
 
-Also, you can set a callback for every deletion/eviction:
+Also, you can set a callback for evictions, deletions, and replacements:
 
 ```ts
 const LRU = createLRU({
@@ -129,6 +129,15 @@ const LRU = createLRU({
   },
 });
 ```
+
+> [!TIP]
+>
+> - `onEviction` naturally runs after the cache has committed the change, so the callback can safely call any method.
+
+> [!NOTE]
+>
+> - Notifications caused from inside a callback are queued and delivered in order after it returns. If a callback throws, the remaining notifications are still delivered and the error is rethrown at the end.
+> - An operation can queue at most `65_536` notifications, or four times the number it produced by itself, whichever is greater. Beyond that, a `RangeError` is thrown, the pending notifications are dropped, and the cache remains consistent. If a callback had thrown before, that error becomes the `RangeError`'s `cause`.
 
 ### Set a cache
 
@@ -190,8 +199,9 @@ LRU.evict(1000);
 
 > [!TIP]
 >
-> - Methods that perform eviction(s) when maximum size is reached: `set` and `resize`.
-> - Methods that always perform eviction(s): `delete`, `clear`, and `evict` itself.
+> - `set` evicts the oldest item when the cache is full, and replaces the value of a key it already holds at any fill level.
+> - `resize` evicts only when the new maximum no longer fits every stored item.
+> - `delete`, `clear`, and `evict` always remove the items they name.
 
 ### Resize the cache
 
@@ -202,7 +212,8 @@ LRU.resize(50_000);
 ```
 
 - Complexity:
-  - Increasing: **O(newMax - max)**.
+  - Increasing: amortized **O(newMax - max)**.
+    - A growth that exceeds the reserved capacity copies the index arrays once (**O(max)**).
   - Downsizing: **O(n)**.
 
 ### Clear the cache
